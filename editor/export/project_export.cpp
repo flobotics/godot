@@ -317,9 +317,6 @@ void ProjectExportDialog::_edit_preset(int p_index) {
 	bool enc_directory_mode = current->get_enc_directory();
 	enc_directory->set_pressed(enc_directory_mode);
 
-	int script_export_mode = current->get_script_export_mode();
-	script_mode->select(script_export_mode);
-
 	String key = current->get_script_encryption_key();
 	if (!updating_script_key) {
 		script_key->set_text(key);
@@ -480,7 +477,7 @@ void ProjectExportDialog::_enc_filters_changed(const String &p_filters) {
 }
 
 void ProjectExportDialog::_open_key_help_link() {
-	OS::get_singleton()->shell_open(vformat("%s/development/compiling/compiling_with_script_encryption_key.html", VERSION_DOCS_URL));
+	OS::get_singleton()->shell_open(vformat("%s/contributing/development/compiling/compiling_with_script_encryption_key.html", VERSION_DOCS_URL));
 }
 
 void ProjectExportDialog::_enc_pck_changed(bool p_pressed) {
@@ -509,19 +506,6 @@ void ProjectExportDialog::_enc_directory_changed(bool p_pressed) {
 	ERR_FAIL_COND(current.is_null());
 
 	current->set_enc_directory(p_pressed);
-
-	_update_current_preset();
-}
-
-void ProjectExportDialog::_script_export_mode_changed(int p_mode) {
-	if (updating) {
-		return;
-	}
-
-	Ref<EditorExportPreset> current = get_current_preset();
-	ERR_FAIL_COND(current.is_null());
-
-	current->set_script_export_mode(p_mode);
 
 	_update_current_preset();
 }
@@ -979,9 +963,6 @@ void ProjectExportDialog::_export_all(bool p_debug) {
 }
 
 void ProjectExportDialog::_bind_methods() {
-	ClassDB::bind_method("_get_drag_data_fw", &ProjectExportDialog::get_drag_data_fw);
-	ClassDB::bind_method("_can_drop_data_fw", &ProjectExportDialog::can_drop_data_fw);
-	ClassDB::bind_method("_drop_data_fw", &ProjectExportDialog::drop_data_fw);
 	ClassDB::bind_method("_export_all", &ProjectExportDialog::_export_all);
 	ClassDB::bind_method("set_export_path", &ProjectExportDialog::set_export_path);
 	ClassDB::bind_method("get_export_path", &ProjectExportDialog::get_export_path);
@@ -1022,8 +1003,7 @@ ProjectExportDialog::ProjectExportDialog() {
 	preset_vb->add_child(mc);
 	mc->set_v_size_flags(Control::SIZE_EXPAND_FILL);
 	presets = memnew(ItemList);
-	// TODO: Must reimplement drag forwarding.
-	//presets->set_drag_forwarding_compat(this);
+	SET_DRAG_FORWARDING_GCD(presets, ProjectExportDialog);
 	mc->add_child(presets);
 	presets->connect("item_selected", callable_mp(this, &ProjectExportDialog::_edit_preset));
 	duplicate_preset = memnew(Button);
@@ -1114,12 +1094,6 @@ ProjectExportDialog::ProjectExportDialog() {
 			TTR("Filters to exclude files/folders from project\n(comma-separated, e.g: *.json, *.txt, docs/*)"),
 			exclude_filters);
 	exclude_filters->connect("text_changed", callable_mp(this, &ProjectExportDialog::_filter_changed));
-
-	script_mode = memnew(OptionButton);
-	resources_vb->add_margin_child(TTR("GDScript Export Mode:"), script_mode);
-	script_mode->add_item(TTR("Text"), (int)EditorExportPreset::MODE_SCRIPT_TEXT);
-	script_mode->add_item(TTR("Compiled Bytecode (Faster Loading)"), (int)EditorExportPreset::MODE_SCRIPT_COMPILED);
-	script_mode->connect("item_selected", callable_mp(this, &ProjectExportDialog::_script_export_mode_changed));
 
 	// Feature tags.
 

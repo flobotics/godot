@@ -48,6 +48,7 @@ class EditorInspector;
 class EditorInspectorPlugin;
 class EditorNode3DGizmoPlugin;
 class EditorPaths;
+class EditorResourceConversionPlugin;
 class EditorResourcePreview;
 class EditorSceneFormatImporter;
 class EditorScenePostImportPlugin;
@@ -148,7 +149,7 @@ protected:
 	void _notification(int p_what);
 
 	static void _bind_methods();
-	Ref<EditorUndoRedoManager> get_undo_redo();
+	EditorUndoRedoManager *get_undo_redo();
 
 	void add_custom_type(const String &p_type, const String &p_base, const Ref<Script> &p_script, const Ref<Texture2D> &p_icon);
 	void remove_custom_type(const String &p_type);
@@ -277,9 +278,6 @@ public:
 	void make_bottom_panel_item_visible(Control *p_item);
 	void hide_bottom_panel();
 
-	virtual void restore_global_state();
-	virtual void save_global_state();
-
 	void add_translation_parser_plugin(const Ref<EditorTranslationParserPlugin> &p_parser);
 	void remove_translation_parser_plugin(const Ref<EditorTranslationParserPlugin> &p_parser);
 
@@ -306,6 +304,9 @@ public:
 
 	void add_debugger_plugin(const Ref<EditorDebuggerPlugin> &p_plugin);
 	void remove_debugger_plugin(const Ref<EditorDebuggerPlugin> &p_plugin);
+
+	void add_resource_conversion_plugin(const Ref<EditorResourceConversionPlugin> &p_plugin);
+	void remove_resource_conversion_plugin(const Ref<EditorResourceConversionPlugin> &p_plugin);
 
 	void enable_plugin();
 	void disable_plugin();

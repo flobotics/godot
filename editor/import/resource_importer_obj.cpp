@@ -206,6 +206,20 @@ static Error _parse_obj(const String &p_path, List<Ref<Mesh>> &r_meshes, bool p_
 	Ref<FileAccess> f = FileAccess::open(p_path, FileAccess::READ);
 	ERR_FAIL_COND_V_MSG(f.is_null(), ERR_CANT_OPEN, vformat("Couldn't open OBJ file '%s', it may not exist or not be readable.", p_path));
 
+	// Avoid trying to load/interpret potential build artifacts from Visual Studio (e.g. when compiling native plugins inside the project tree)
+	// This should only match, if it's indeed a COFF file header
+	// https://learn.microsoft.com/en-us/windows/win32/debug/pe-format#machine-types
+	const int first_bytes = f->get_16();
+	static const Vector<int> coff_header_machines{
+		0x0, // IMAGE_FILE_MACHINE_UNKNOWN
+		0x8664, // IMAGE_FILE_MACHINE_AMD64
+		0x1c0, // IMAGE_FILE_MACHINE_ARM
+		0x14c, // IMAGE_FILE_MACHINE_I386
+		0x200, // IMAGE_FILE_MACHINE_IA64
+	};
+	ERR_FAIL_COND_V_MSG(coff_header_machines.find(first_bytes) != -1, ERR_FILE_CORRUPT, vformat("Couldn't read OBJ file '%s', it seems to be binary, corrupted, or empty.", p_path));
+	f->seek(0);
+
 	Ref<ArrayMesh> mesh;
 	mesh.instantiate();
 
@@ -218,7 +232,8 @@ static Error _parse_obj(const String &p_path, List<Ref<Mesh>> &r_meshes, bool p_
 	Vector<Vector3> normals;
 	Vector<Vector2> uvs;
 	Vector<Color> colors;
-	String name;
+	const String default_name = "Mesh";
+	String name = default_name;
 
 	HashMap<String, HashMap<String, Ref<StandardMaterial3D>>> material_map;
 
@@ -395,9 +410,12 @@ static Error _parse_obj(const String &p_path, List<Ref<Mesh>> &r_meshes, bool p_
 
 			if (l.begins_with("o ") || f->eof_reached()) {
 				if (!p_single_mesh) {
-					mesh->set_name(name);
-					r_meshes.push_back(mesh);
-					mesh.instantiate();
+					if (mesh->get_surface_count() > 0) {
+						mesh->set_name(name);
+						r_meshes.push_back(mesh);
+						mesh.instantiate();
+					}
+					name = default_name;
 					current_group = "";
 					current_material = "";
 				}
@@ -460,6 +478,7 @@ Node *EditorOBJImporter::import_scene(const String &p_path, uint32_t p_flags, co
 	for (const Ref<Mesh> &m : meshes) {
 		Ref<ImporterMesh> mesh;
 		mesh.instantiate();
+		mesh->set_name(m->get_name());
 		for (int i = 0; i < m->get_surface_count(); i++) {
 			mesh->add_surface(m->surface_get_primitive_type(i), m->surface_get_arrays(i), Array(), Dictionary(), m->surface_get_material(i));
 		}

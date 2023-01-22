@@ -141,6 +141,8 @@ public:
 
 	void set_setting(const String &p_setting, const Variant &p_value);
 	Variant get_setting(const String &p_setting, const Variant &p_default_value = Variant()) const;
+	Array get_global_class_list();
+	void store_global_class_list(const Array &p_classes);
 
 	bool has_setting(String p_var) const;
 	String localize_path(const String &p_path) const;
@@ -175,8 +177,6 @@ public:
 	void set_custom_property_info(const PropertyInfo &p_info);
 	const HashMap<StringName, PropertyInfo> &get_custom_property_info() const;
 	uint64_t get_last_saved_time() { return last_save_time; }
-
-	Vector<String> get_optimizer_presets() const;
 
 	List<String> get_input_presets() const { return input_presets; }
 

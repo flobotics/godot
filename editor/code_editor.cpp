@@ -143,6 +143,7 @@ void FindReplaceBar::unhandled_input(const Ref<InputEvent> &p_event) {
 }
 
 bool FindReplaceBar::_search(uint32_t p_flags, int p_from_line, int p_from_col) {
+	text_editor->remove_secondary_carets();
 	String text = get_search_text();
 	Point2i pos = text_editor->search(text, p_flags, p_from_line, p_from_col);
 
@@ -178,6 +179,7 @@ bool FindReplaceBar::_search(uint32_t p_flags, int p_from_line, int p_from_col) 
 }
 
 void FindReplaceBar::_replace() {
+	text_editor->remove_secondary_carets();
 	bool selection_enabled = text_editor->has_selection(0);
 	Point2i selection_begin, selection_end;
 	if (selection_enabled) {
@@ -225,6 +227,7 @@ void FindReplaceBar::_replace() {
 }
 
 void FindReplaceBar::_replace_all() {
+	text_editor->remove_secondary_carets();
 	text_editor->disconnect("text_changed", callable_mp(this, &FindReplaceBar::_editor_text_changed));
 	// Line as x so it gets priority in comparison, column as y.
 	Point2i orig_cursor(text_editor->get_caret_line(0), text_editor->get_caret_column(0));
@@ -2083,6 +2086,7 @@ CodeTextEditor::CodeTextEditor() {
 	text_editor = memnew(CodeEdit);
 	add_child(text_editor);
 	text_editor->set_v_size_flags(SIZE_EXPAND_FILL);
+	text_editor->set_structured_text_bidi_override(TextServer::STRUCTURED_TEXT_GDSCRIPT);
 
 	int ot_mode = EDITOR_GET("interface/editor/code_font_contextual_ligatures");
 	Ref<FontVariation> fc = text_editor->get_theme_font(SNAME("font"));

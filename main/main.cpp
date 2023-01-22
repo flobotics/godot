@@ -1677,10 +1677,21 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	OS::get_singleton()->_allow_hidpi = GLOBAL_DEF("display/window/dpi/allow_hidpi", true);
 	OS::get_singleton()->_allow_layered = GLOBAL_DEF("display/window/per_pixel_transparency/allowed", false);
 
+#ifdef TOOLS_ENABLED
 	if (editor || project_manager) {
-		// The editor and project manager always detect and use hiDPI if needed
+		// The editor and project manager always detect and use hiDPI if needed.
 		OS::get_singleton()->_allow_hidpi = true;
+		// Disable Vulkan overlays in editor, they cause various issues.
+		OS::get_singleton()->set_environment("DISABLE_MANGOHUD", "1"); // GH-57403.
+		OS::get_singleton()->set_environment("DISABLE_RTSS_LAYER", "1"); // GH-57937.
+		OS::get_singleton()->set_environment("DISABLE_VKBASALT", "1");
+	} else {
+		// Re-allow using Vulkan overlays, disabled while using the editor.
+		OS::get_singleton()->unset_environment("DISABLE_MANGOHUD");
+		OS::get_singleton()->unset_environment("DISABLE_RTSS_LAYER");
+		OS::get_singleton()->unset_environment("DISABLE_VKBASALT");
 	}
+#endif
 
 	if (rtm == -1) {
 		rtm = GLOBAL_DEF("rendering/driver/threads/thread_model", OS::RENDER_THREAD_SAFE);
@@ -2114,7 +2125,7 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 #endif
 		}
 
-#ifdef TOOLS_ENABLED
+#if defined(TOOLS_ENABLED) && defined(MACOS_ENABLED)
 		if (OS::get_singleton()->get_bundle_icon_path().is_empty()) {
 			Ref<Image> icon = memnew(Image(app_icon_png));
 			DisplayServer::get_singleton()->set_icon(icon);
@@ -2419,6 +2430,14 @@ bool Main::start() {
 			Ref<DirAccess> da = DirAccess::open(doc_tool_path);
 			ERR_FAIL_COND_V_MSG(da.is_null(), false, "Argument supplied to --doctool must be a valid directory path.");
 		}
+
+#ifndef MODULE_MONO_ENABLED
+		// Hack to define .NET-specific project settings even on non-.NET builds,
+		// so that we don't lose their descriptions and default values in DocTools.
+		// Default values should be synced with mono_gd/gd_mono.cpp.
+		GLOBAL_DEF("dotnet/project/assembly_name", "");
+		GLOBAL_DEF("dotnet/project/solution_directory", "");
+#endif
 
 		Error err;
 		DocTools doc;
@@ -3030,6 +3049,9 @@ bool Main::iteration() {
 		PhysicsServer2D::get_singleton()->flush_queries();
 
 		if (OS::get_singleton()->get_main_loop()->physics_process(physics_step * time_scale)) {
+			PhysicsServer3D::get_singleton()->end_sync();
+			PhysicsServer2D::get_singleton()->end_sync();
+
 			exit = true;
 			break;
 		}
@@ -3153,10 +3175,12 @@ bool Main::iteration() {
 		auto_build_solutions = false;
 		// Only relevant when running the editor.
 		if (!editor) {
+			OS::get_singleton()->set_exit_code(EXIT_FAILURE);
 			ERR_FAIL_V_MSG(true,
 					"Command line option --build-solutions was passed, but no project is being edited. Aborting.");
 		}
 		if (!EditorNode::get_singleton()->call_build()) {
+			OS::get_singleton()->set_exit_code(EXIT_FAILURE);
 			ERR_FAIL_V_MSG(true,
 					"Command line option --build-solutions was passed, but the build callback failed. Aborting.");
 		}

@@ -80,7 +80,6 @@ public:
 
 	// Gets an object from the history. The most recent object would be the object with p_obj = get_history_len() - 1.
 	ObjectID get_history_obj(int p_obj) const;
-	bool is_history_obj_inspector_only(int p_obj) const;
 
 	bool next();
 	bool previous();
@@ -133,7 +132,7 @@ private:
 	HashMap<String, Vector<CustomType>> custom_types;
 
 	List<PropertyData> clipboard;
-	Ref<EditorUndoRedoManager> undo_redo_manager;
+	EditorUndoRedoManager *undo_redo_manager;
 	Vector<Callable> undo_redo_callbacks;
 	HashMap<StringName, Callable> move_element_functions;
 
@@ -168,7 +167,6 @@ public:
 	int get_editor_plugin_count() const;
 	EditorPlugin *get_editor_plugin(int p_idx);
 
-	Ref<EditorUndoRedoManager> &get_undo_redo();
 	void add_undo_redo_inspector_hook_callback(Callable p_callable); // Callbacks should have this signature: void (Object* undo_redo, Object *modified_object, String property, Variant new_value)
 	void remove_undo_redo_inspector_hook_callback(Callable p_callable);
 	const Vector<Callable> get_undo_redo_inspector_hook_callback();
@@ -178,7 +176,6 @@ public:
 	Callable get_move_array_element_function(const StringName &p_class) const;
 
 	void save_editor_global_states();
-	void restore_editor_global_states();
 
 	void add_custom_type(const String &p_type, const String &p_inherits, const Ref<Script> &p_script, const Ref<Texture2D> &p_icon);
 	Variant instantiate_custom_type(const String &p_type, const String &p_inherits);
@@ -245,6 +242,7 @@ public:
 	void script_class_load_icon_paths();
 
 	EditorData();
+	~EditorData();
 };
 
 /**

@@ -338,11 +338,16 @@ def configure(env: "Environment"):
 
     env.Prepend(CPPPATH=["#platform/linuxbsd"])
 
+    env.Append(
+        CPPDEFINES=[
+            "LINUXBSD_ENABLED",
+            "UNIX_ENABLED",
+            ("_FILE_OFFSET_BITS", 64),
+        ]
+    )
+
     if env["x11"]:
         env.Append(CPPDEFINES=["X11_ENABLED"])
-
-    env.Append(CPPDEFINES=["UNIX_ENABLED"])
-    env.Append(CPPDEFINES=[("_FILE_OFFSET_BITS", 64)])
 
     if env["vulkan"]:
         env.Append(CPPDEFINES=["VULKAN_ENABLED"])
@@ -400,9 +405,9 @@ def configure(env: "Environment"):
     # Link those statically for portability
     if env["use_static_cpp"]:
         env.Append(LINKFLAGS=["-static-libgcc", "-static-libstdc++"])
-        if env["use_llvm"]:
+        if env["use_llvm"] and platform.system() != "FreeBSD":
             env["LINKCOM"] = env["LINKCOM"] + " -l:libatomic.a"
 
     else:
-        if env["use_llvm"]:
+        if env["use_llvm"] and platform.system() != "FreeBSD":
             env.Append(LIBS=["atomic"])
