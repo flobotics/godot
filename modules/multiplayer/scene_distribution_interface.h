@@ -23,6 +23,9 @@ private:
 	//here save requested glb files. If they are created and distributed, they are removed. Pending requests
 	HashSet<String> requested_glb_files;
 
+	//storage for all already distributed glb files
+	HashSet<String> distributed_glb_files;
+
 	// used only inside scene_distribution_interface.cpp
 	void _distribute_glb(const String& p_path, int id);
 	void _remove_glb_as_requested(const String& glb_name);

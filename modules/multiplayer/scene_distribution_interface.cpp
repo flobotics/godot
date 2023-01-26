@@ -142,6 +142,12 @@ void SceneDistributionInterface::_distribute_glb(const String& p_path, int id)
 	ResourceSaver s;
 	Error error = s.save(p, save_path);  // Or "user://..."
 
+	//print error
+	if (error != OK) {
+		printf("error saving glb file\n");
+	}
+	
+
 	// add new resource to own MultiplayerSpawner.add_spawnable_scene
 	Node* root_node = SceneTree::get_singleton()->get_root()->get_node(multiplayer->get_root_path());
 	Node* node = root_node->get_node(NodePath("/root/Main/PlayerSpawner"));
@@ -182,6 +188,12 @@ void SceneDistributionInterface::_distribute_glb(const String& p_path, int id)
 			multiplayer->get_multiplayer_peer()->put_packet(buf.data(), packet_len);
 		}
 	}
+
+	//remove glb file from requested_glb_files
+	requested_glb_files.erase(p_path);
+
+	//add glb file to distributed_glb_files
+	distributed_glb_files.insert(p_path);
 }
 
 
@@ -203,11 +215,15 @@ void SceneDistributionInterface::request_to_externally_create_glb(const String& 
 	char return_value[100];
 
 	fp = _popen(externally_create_glb_script.ascii().get_data(), "r");
-	if (fp == NULL)
+	if (fp == NULL) {
 		printf("_popen-open error\n");
+		return;
+	}
 
-	while (fgets(return_value, 200, fp) != NULL)
+	while (fgets(return_value, 100, fp) != NULL) {
 		printf("%s", return_value);
+		return;
+	}
 
 	// if we get a "bad" return value, we could remove the requested_glb, so
 	// that the poll() function in scene_multiplayer.cpp is not looking for the file anymore
@@ -244,9 +260,6 @@ void SceneDistributionInterface::check_if_externally_created_glb_was_created()
 		std::ifstream f(s.ascii().get_data());
 		if (f.good()) {
 			//printf("Found requested glb\n");
-
-			//remove glb-name from requested_glb_files
-			requested_glb_files.remove(it);
 
 			//distribute it now
 			_distribute_glb(it->ascii().get_data(), 1);
