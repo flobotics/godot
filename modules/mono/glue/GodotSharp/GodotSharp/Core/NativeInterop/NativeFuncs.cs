@@ -409,6 +409,10 @@ namespace Godot.NativeInterop
         public static partial void godotsharp_dictionary_duplicate(ref godot_dictionary p_self, godot_bool p_deep,
             out godot_dictionary r_dest);
 
+        public static partial void godotsharp_dictionary_merge(ref godot_dictionary p_self, in godot_dictionary p_dictionary, godot_bool p_overwrite);
+
+        public static partial godot_bool godotsharp_dictionary_recursive_equal(ref godot_dictionary p_self, in godot_dictionary p_other);
+
         public static partial godot_bool godotsharp_dictionary_remove_key(ref godot_dictionary p_self,
             in godot_variant p_key);
 
@@ -493,8 +497,6 @@ namespace Godot.NativeInterop
         internal static partial void godotsharp_seed(ulong seed);
 
         internal static partial void godotsharp_weakref(IntPtr p_obj, out godot_ref r_weak_ref);
-
-        internal static partial void godotsharp_str(in godot_array p_what, out godot_string r_ret);
 
         internal static partial void godotsharp_str_to_var(in godot_string p_str, out godot_variant r_ret);
 

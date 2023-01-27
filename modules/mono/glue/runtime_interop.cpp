@@ -1066,6 +1066,14 @@ void godotsharp_dictionary_duplicate(const Dictionary *p_self, bool p_deep, Dict
 	memnew_placement(r_dest, Dictionary(p_self->duplicate(p_deep)));
 }
 
+void godotsharp_dictionary_merge(Dictionary *p_self, const Dictionary *p_dictionary, bool p_overwrite) {
+	p_self->merge(*p_dictionary, p_overwrite);
+}
+
+bool godotsharp_dictionary_recursive_equal(const Dictionary *p_self, const Dictionary *p_other) {
+	return p_self->recursive_equal(*p_other, 0);
+}
+
 bool godotsharp_dictionary_remove_key(Dictionary *p_self, const Variant *p_key) {
 	return p_self->erase(*p_key);
 }
@@ -1178,21 +1186,6 @@ void godotsharp_weakref(Object *p_ptr, Ref<RefCounted> *r_weak_ref) {
 	}
 
 	memnew_placement(r_weak_ref, Ref<RefCounted>(wref));
-}
-
-void godotsharp_str(const godot_array *p_what, godot_string *r_ret) {
-	String &str = *memnew_placement(r_ret, String);
-	const Array &what = *reinterpret_cast<const Array *>(p_what);
-
-	for (int i = 0; i < what.size(); i++) {
-		String os = what[i].operator String();
-
-		if (i == 0) {
-			str = os;
-		} else {
-			str += os;
-		}
-	}
 }
 
 void godotsharp_print(const godot_string *p_what) {
@@ -1455,6 +1448,8 @@ static const void *unmanaged_callbacks[]{
 	(void *)godotsharp_dictionary_clear,
 	(void *)godotsharp_dictionary_contains_key,
 	(void *)godotsharp_dictionary_duplicate,
+	(void *)godotsharp_dictionary_merge,
+	(void *)godotsharp_dictionary_recursive_equal,
 	(void *)godotsharp_dictionary_remove_key,
 	(void *)godotsharp_dictionary_to_string,
 	(void *)godotsharp_string_simplify_path,
@@ -1488,7 +1483,6 @@ static const void *unmanaged_callbacks[]{
 	(void *)godotsharp_rand_from_seed,
 	(void *)godotsharp_seed,
 	(void *)godotsharp_weakref,
-	(void *)godotsharp_str,
 	(void *)godotsharp_str_to_var,
 	(void *)godotsharp_var_to_bytes,
 	(void *)godotsharp_var_to_str,

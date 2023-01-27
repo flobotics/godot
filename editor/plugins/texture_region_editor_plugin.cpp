@@ -256,10 +256,10 @@ void TextureRegionEditor::_region_draw() {
 			margins[2] = node_ninepatch->get_patch_margin(SIDE_LEFT);
 			margins[3] = node_ninepatch->get_patch_margin(SIDE_RIGHT);
 		} else if (obj_styleBox.is_valid()) {
-			margins[0] = obj_styleBox->get_margin_size(SIDE_TOP);
-			margins[1] = obj_styleBox->get_margin_size(SIDE_BOTTOM);
-			margins[2] = obj_styleBox->get_margin_size(SIDE_LEFT);
-			margins[3] = obj_styleBox->get_margin_size(SIDE_RIGHT);
+			margins[0] = obj_styleBox->get_texture_margin(SIDE_TOP);
+			margins[1] = obj_styleBox->get_texture_margin(SIDE_BOTTOM);
+			margins[2] = obj_styleBox->get_texture_margin(SIDE_LEFT);
+			margins[3] = obj_styleBox->get_texture_margin(SIDE_RIGHT);
 		}
 
 		Vector2 pos[4] = {
@@ -314,10 +314,10 @@ void TextureRegionEditor::_region_input(const Ref<InputEvent> &p_input) {
 						margins[2] = node_ninepatch->get_patch_margin(SIDE_LEFT);
 						margins[3] = node_ninepatch->get_patch_margin(SIDE_RIGHT);
 					} else if (obj_styleBox.is_valid()) {
-						margins[0] = obj_styleBox->get_margin_size(SIDE_TOP);
-						margins[1] = obj_styleBox->get_margin_size(SIDE_BOTTOM);
-						margins[2] = obj_styleBox->get_margin_size(SIDE_LEFT);
-						margins[3] = obj_styleBox->get_margin_size(SIDE_RIGHT);
+						margins[0] = obj_styleBox->get_texture_margin(SIDE_TOP);
+						margins[1] = obj_styleBox->get_texture_margin(SIDE_BOTTOM);
+						margins[2] = obj_styleBox->get_texture_margin(SIDE_LEFT);
+						margins[3] = obj_styleBox->get_texture_margin(SIDE_RIGHT);
 					}
 
 					Vector2 pos[4] = {
@@ -431,8 +431,8 @@ void TextureRegionEditor::_region_input(const Ref<InputEvent> &p_input) {
 						undo_redo->add_do_method(node_ninepatch, "set_patch_margin", side[edited_margin], node_ninepatch->get_patch_margin(side[edited_margin]));
 						undo_redo->add_undo_method(node_ninepatch, "set_patch_margin", side[edited_margin], prev_margin);
 					} else if (obj_styleBox.is_valid()) {
-						undo_redo->add_do_method(obj_styleBox.ptr(), "set_margin_size", side[edited_margin], obj_styleBox->get_margin_size(side[edited_margin]));
-						undo_redo->add_undo_method(obj_styleBox.ptr(), "set_margin_size", side[edited_margin], prev_margin);
+						undo_redo->add_do_method(obj_styleBox.ptr(), "set_texture_margin", side[edited_margin], obj_styleBox->get_texture_margin(side[edited_margin]));
+						undo_redo->add_undo_method(obj_styleBox.ptr(), "set_texture_margin", side[edited_margin], prev_margin);
 						obj_styleBox->emit_signal(CoreStringNames::get_singleton()->changed);
 					}
 					edited_margin = -1;
@@ -474,7 +474,7 @@ void TextureRegionEditor::_region_input(const Ref<InputEvent> &p_input) {
 						node_ninepatch->set_patch_margin(side[edited_margin], prev_margin);
 					}
 					if (obj_styleBox.is_valid()) {
-						obj_styleBox->set_margin_size(side[edited_margin], prev_margin);
+						obj_styleBox->set_texture_margin(side[edited_margin], prev_margin);
 					}
 					edited_margin = -1;
 				} else {
@@ -535,7 +535,7 @@ void TextureRegionEditor::_region_input(const Ref<InputEvent> &p_input) {
 					node_ninepatch->set_patch_margin(side[edited_margin], new_margin);
 				}
 				if (obj_styleBox.is_valid()) {
-					obj_styleBox->set_margin_size(side[edited_margin], new_margin);
+					obj_styleBox->set_texture_margin(side[edited_margin], new_margin);
 				}
 			} else {
 				Vector2 new_pos = mtx.affine_inverse().xform(mm->get_position());
@@ -620,22 +620,14 @@ void TextureRegionEditor::_region_input(const Ref<InputEvent> &p_input) {
 	}
 }
 
-void TextureRegionEditor::_scroll_callback(Vector2 p_scroll_vec, bool p_alt) {
-	_pan_callback(-p_scroll_vec * 32);
-}
-
-void TextureRegionEditor::_pan_callback(Vector2 p_scroll_vec) {
+void TextureRegionEditor::_pan_callback(Vector2 p_scroll_vec, Ref<InputEvent> p_event) {
 	p_scroll_vec /= draw_zoom;
 	hscroll->set_value(hscroll->get_value() - p_scroll_vec.x);
 	vscroll->set_value(vscroll->get_value() - p_scroll_vec.y);
 }
 
-void TextureRegionEditor::_zoom_callback(Vector2 p_scroll_vec, Vector2 p_origin, bool p_alt) {
-	if (p_scroll_vec.y < 0) {
-		_zoom_on_position(draw_zoom * ((0.95 + (0.05 * Math::abs(p_scroll_vec.y))) / 0.95), p_origin);
-	} else {
-		_zoom_on_position(draw_zoom * (1 - (0.05 * Math::abs(p_scroll_vec.y))), p_origin);
-	}
+void TextureRegionEditor::_zoom_callback(float p_zoom_factor, Vector2 p_origin, Ref<InputEvent> p_event) {
+	_zoom_on_position(draw_zoom * p_zoom_factor, p_origin);
 }
 
 void TextureRegionEditor::_scroll_changed(float) {
@@ -748,6 +740,9 @@ void TextureRegionEditor::_update_rect() {
 		}
 	} else if (obj_styleBox.is_valid()) {
 		rect = obj_styleBox->get_region_rect();
+		if (rect == Rect2()) {
+			rect = Rect2(Vector2(), obj_styleBox->get_texture()->get_size());
+		}
 	}
 }
 
@@ -1169,7 +1164,7 @@ TextureRegionEditor::TextureRegionEditor() {
 	hb_grid->hide();
 
 	panner.instantiate();
-	panner->set_callbacks(callable_mp(this, &TextureRegionEditor::_scroll_callback), callable_mp(this, &TextureRegionEditor::_pan_callback), callable_mp(this, &TextureRegionEditor::_zoom_callback));
+	panner->set_callbacks(callable_mp(this, &TextureRegionEditor::_pan_callback), callable_mp(this, &TextureRegionEditor::_zoom_callback));
 
 	edit_draw = memnew(Panel);
 	vb->add_child(edit_draw);

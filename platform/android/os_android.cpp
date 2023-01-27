@@ -695,8 +695,8 @@ bool OS_Android::_check_internal_feature_support(const String &p_feature) {
 }
 
 OS_Android::OS_Android(GodotJavaWrapper *p_godot_java, GodotIOJavaWrapper *p_godot_io_java, bool p_use_apk_expansion) {
-	display_size.width = 800;
-	display_size.height = 600;
+	display_size.width = DEFAULT_WINDOW_WIDTH;
+	display_size.height = DEFAULT_WINDOW_HEIGHT;
 
 	use_apk_expansion = p_use_apk_expansion;
 
@@ -739,8 +739,18 @@ Error OS_Android::create_process(const String &p_path, const List<String> &p_arg
 }
 
 Error OS_Android::create_instance(const List<String> &p_arguments, ProcessID *r_child_id) {
-	godot_java->create_new_godot_instance(p_arguments);
+	int instance_id = godot_java->create_new_godot_instance(p_arguments);
+	if (r_child_id) {
+		*r_child_id = instance_id;
+	}
 	return OK;
+}
+
+Error OS_Android::kill(const ProcessID &p_pid) {
+	if (godot_java->force_quit(nullptr, p_pid)) {
+		return OK;
+	}
+	return OS_Unix::kill(p_pid);
 }
 
 OS_Android::~OS_Android() {

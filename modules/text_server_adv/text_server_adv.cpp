@@ -443,19 +443,11 @@ bool TextServerAdvanced::_load_support_data(const String &p_filename) {
 }
 
 String TextServerAdvanced::_get_support_data_filename() const {
-#ifdef ICU_STATIC_DATA
 	return _MKSTR(ICU_DATA_NAME);
-#else
-	return String();
-#endif
 }
 
 String TextServerAdvanced::_get_support_data_info() const {
-#ifdef ICU_STATIC_DATA
 	return String("ICU break iteration data (") + _MKSTR(ICU_DATA_NAME) + String(").");
-#else
-	return String();
-#endif
 }
 
 bool TextServerAdvanced::_save_support_data(const String &p_filename) const {
@@ -4136,8 +4128,9 @@ bool TextServerAdvanced::_shape_substr(ShapedTextDataAdvanced *p_new_sd, const S
 			if (p_sd->bidi_override[ov].x >= p_start + p_length || p_sd->bidi_override[ov].y <= p_start) {
 				continue;
 			}
-			int start = _convert_pos_inv(p_sd, MAX(0, p_start - p_sd->bidi_override[ov].x));
-			int end = _convert_pos_inv(p_sd, MIN(p_start + p_length, p_sd->bidi_override[ov].y) - p_sd->bidi_override[ov].x);
+			int ov_start = _convert_pos_inv(p_sd, p_sd->bidi_override[ov].x);
+			int start = MAX(0, _convert_pos_inv(p_sd, p_start) - ov_start);
+			int end = MIN(_convert_pos_inv(p_sd, p_start + p_length), _convert_pos_inv(p_sd, p_sd->bidi_override[ov].y)) - ov_start;
 
 			ERR_FAIL_COND_V_MSG((start < 0 || end - start > p_new_sd->utf16.length()), false, "Invalid BiDi override range.");
 
@@ -4159,8 +4152,8 @@ bool TextServerAdvanced::_shape_substr(ShapedTextDataAdvanced *p_new_sd, const S
 				int32_t _bidi_run_length = 0;
 				ubidi_getVisualRun(bidi_iter, i, &_bidi_run_start, &_bidi_run_length);
 
-				int32_t bidi_run_start = _convert_pos(p_sd, p_sd->bidi_override[ov].x + start + _bidi_run_start);
-				int32_t bidi_run_end = _convert_pos(p_sd, p_sd->bidi_override[ov].x + start + _bidi_run_start + _bidi_run_length);
+				int32_t bidi_run_start = _convert_pos(p_sd, ov_start + start + _bidi_run_start);
+				int32_t bidi_run_end = _convert_pos(p_sd, ov_start + start + _bidi_run_start + _bidi_run_length);
 
 				for (int j = 0; j < sd_size; j++) {
 					if ((sd_glyphs[j].start >= bidi_run_start) && (sd_glyphs[j].end <= bidi_run_end)) {
@@ -5587,7 +5580,7 @@ bool TextServerAdvanced::_shaped_text_shape(const RID &p_shaped) {
 		}
 
 		UErrorCode err = U_ZERO_ERROR;
-		UBiDi *bidi_iter = ubidi_openSized(end, 0, &err);
+		UBiDi *bidi_iter = ubidi_openSized(end - start, 0, &err);
 		ERR_FAIL_COND_V_MSG(U_FAILURE(err), false, u_errorName(err));
 
 		switch (static_cast<TextServer::Direction>(sd->bidi_override[ov].z)) {
@@ -5605,7 +5598,7 @@ bool TextServerAdvanced::_shaped_text_shape(const RID &p_shaped) {
 				if (direction != UBIDI_NEUTRAL) {
 					ubidi_setPara(bidi_iter, data + start, end - start, direction, nullptr, &err);
 				} else {
-					ubidi_setPara(bidi_iter, data + start, end - start, UBIDI_DEFAULT_LTR, nullptr, &err);
+					ubidi_setPara(bidi_iter, data + start, end - start, base_para_direction, nullptr, &err);
 				}
 			} break;
 		}
@@ -5637,8 +5630,8 @@ bool TextServerAdvanced::_shaped_text_shape(const RID &p_shaped) {
 				}
 			}
 
-			int32_t bidi_run_start = _convert_pos(sd, sd->bidi_override[ov].x - sd->start + _bidi_run_start);
-			int32_t bidi_run_end = _convert_pos(sd, sd->bidi_override[ov].x - sd->start + _bidi_run_start + _bidi_run_length);
+			int32_t bidi_run_start = _convert_pos(sd, start + _bidi_run_start);
+			int32_t bidi_run_end = _convert_pos(sd, start + _bidi_run_start + _bidi_run_length);
 
 			// Shape runs.
 
@@ -6113,6 +6106,11 @@ String TextServerAdvanced::_percent_sign(const String &p_language) const {
 }
 
 int64_t TextServerAdvanced::_is_confusable(const String &p_string, const PackedStringArray &p_dict) const {
+#ifndef ICU_STATIC_DATA
+	if (!icu_data_loaded) {
+		return -1;
+	}
+#endif
 	UErrorCode status = U_ZERO_ERROR;
 	int64_t match_index = -1;
 
@@ -6153,6 +6151,11 @@ int64_t TextServerAdvanced::_is_confusable(const String &p_string, const PackedS
 }
 
 bool TextServerAdvanced::_spoof_check(const String &p_string) const {
+#ifndef ICU_STATIC_DATA
+	if (!icu_data_loaded) {
+		return false;
+	}
+#endif
 	UErrorCode status = U_ZERO_ERROR;
 	Char16String utf16 = p_string.utf16();
 
@@ -6175,6 +6178,11 @@ bool TextServerAdvanced::_spoof_check(const String &p_string) const {
 }
 
 String TextServerAdvanced::_strip_diacritics(const String &p_string) const {
+#ifndef ICU_STATIC_DATA
+	if (!icu_data_loaded) {
+		return TextServer::strip_diacritics(p_string);
+	}
+#endif
 	UErrorCode err = U_ZERO_ERROR;
 
 	// Get NFKD normalizer singleton.
@@ -6212,6 +6220,12 @@ String TextServerAdvanced::_strip_diacritics(const String &p_string) const {
 }
 
 String TextServerAdvanced::_string_to_upper(const String &p_string, const String &p_language) const {
+#ifndef ICU_STATIC_DATA
+	if (!icu_data_loaded) {
+		return p_string.to_upper();
+	}
+#endif
+
 	if (p_string.is_empty()) {
 		return p_string;
 	}
@@ -6234,6 +6248,12 @@ String TextServerAdvanced::_string_to_upper(const String &p_string, const String
 }
 
 String TextServerAdvanced::_string_to_lower(const String &p_string, const String &p_language) const {
+#ifndef ICU_STATIC_DATA
+	if (!icu_data_loaded) {
+		return p_string.to_lower();
+	}
+#endif
+
 	if (p_string.is_empty()) {
 		return p_string;
 	}
@@ -6269,8 +6289,8 @@ PackedInt32Array TextServerAdvanced::_string_get_word_breaks(const String &p_str
 				breaks.insert(pos);
 			}
 		}
+		ubrk_close(bi);
 	}
-	ubrk_close(bi);
 
 	PackedInt32Array ret;
 
@@ -6351,6 +6371,13 @@ PackedInt32Array TextServerAdvanced::_string_get_word_breaks(const String &p_str
 }
 
 bool TextServerAdvanced::_is_valid_identifier(const String &p_string) const {
+#ifndef ICU_STATIC_DATA
+	if (!icu_data_loaded) {
+		WARN_PRINT_ONCE("ICU data is not loaded, Unicode security and spoofing detection disabled.");
+		return TextServer::is_valid_identifier(p_string);
+	}
+#endif
+
 	enum UAX31SequenceStatus {
 		SEQ_NOT_STARTED,
 		SEQ_STARTED,

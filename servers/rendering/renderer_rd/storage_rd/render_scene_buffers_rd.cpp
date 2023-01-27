@@ -251,7 +251,7 @@ RID RenderSceneBuffersRD::create_texture(const StringName &p_context, const Stri
 }
 
 RID RenderSceneBuffersRD::create_texture_from_format(const StringName &p_context, const StringName &p_texture_name, const RD::TextureFormat &p_texture_format, RD::TextureView p_view, bool p_unique) {
-	// TODO p_unique, if p_unique is true, this is a texture that can be shared. This will be implemented later as an optimisation.
+	// TODO p_unique, if p_unique is true, this is a texture that can be shared. This will be implemented later as an optimization.
 
 	NTKey key(p_context, p_texture_name);
 
@@ -489,6 +489,16 @@ Ref<RenderBufferCustomDataRD> RenderSceneBuffersRD::get_custom_data(const String
 }
 
 // Depth texture
+
+bool RenderSceneBuffersRD::has_depth_texture() {
+	RendererRD::TextureStorage *texture_storage = RendererRD::TextureStorage::get_singleton();
+	RID depth = texture_storage->render_target_get_override_depth(render_target);
+	if (depth.is_valid()) {
+		return true;
+	} else {
+		return has_texture(RB_SCOPE_BUFFERS, RB_TEX_DEPTH);
+	}
+}
 
 RID RenderSceneBuffersRD::get_depth_texture() {
 	RendererRD::TextureStorage *texture_storage = RendererRD::TextureStorage::get_singleton();

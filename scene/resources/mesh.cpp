@@ -189,6 +189,7 @@ Ref<TriangleMesh> Mesh::generate_triangle_mesh() const {
 			if (primitive == PRIMITIVE_TRIANGLES) {
 				for (int j = 0; j < ic; j++) {
 					int index = ir[j];
+					ERR_FAIL_COND_V(index >= vc, Ref<TriangleMesh>());
 					facesw[widx++] = vr[index];
 				}
 			} else { // PRIMITIVE_TRIANGLE_STRIP
@@ -614,6 +615,13 @@ Size2i Mesh::get_lightmap_size_hint() const {
 	return lightmap_size_hint;
 }
 
+Ref<Resource> Mesh::create_placeholder() const {
+	Ref<PlaceholderMesh> placeholder;
+	placeholder.instantiate();
+	placeholder->set_aabb(get_aabb());
+	return placeholder;
+}
+
 void Mesh::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_lightmap_size_hint", "size"), &Mesh::set_lightmap_size_hint);
 	ClassDB::bind_method(D_METHOD("get_lightmap_size_hint"), &Mesh::get_lightmap_size_hint);
@@ -626,6 +634,7 @@ void Mesh::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("surface_get_blend_shape_arrays", "surf_idx"), &Mesh::surface_get_blend_shape_arrays);
 	ClassDB::bind_method(D_METHOD("surface_set_material", "surf_idx", "material"), &Mesh::surface_set_material);
 	ClassDB::bind_method(D_METHOD("surface_get_material", "surf_idx"), &Mesh::surface_get_material);
+	ClassDB::bind_method(D_METHOD("create_placeholder"), &Mesh::create_placeholder);
 
 	BIND_ENUM_CONSTANT(PRIMITIVE_POINTS);
 	BIND_ENUM_CONSTANT(PRIMITIVE_LINES);
@@ -1120,17 +1129,6 @@ bool ArrayMesh::_set(const StringName &p_name, const Variant &p_value) {
 			return false;
 		}
 		int idx = sname.substr(8, sl - 8).to_int();
-
-		// This is a bit of a hack to ensure compatibility with older material
-		// overrides that start indexing at 1.
-		// We assume that idx 0 is always read first, if its not, this won't work.
-		if (idx == 0) {
-			surface_index_0 = true;
-		}
-		if (!surface_index_0) {
-			// This means the file was created when the indexing started at 1, so decrease by one.
-			idx--;
-		}
 
 		String what = sname.get_slicec('/', 1);
 		if (what == "material") {

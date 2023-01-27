@@ -93,6 +93,7 @@ void Input::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_anything_pressed"), &Input::is_anything_pressed);
 	ClassDB::bind_method(D_METHOD("is_key_pressed", "keycode"), &Input::is_key_pressed);
 	ClassDB::bind_method(D_METHOD("is_physical_key_pressed", "keycode"), &Input::is_physical_key_pressed);
+	ClassDB::bind_method(D_METHOD("is_key_label_pressed", "keycode"), &Input::is_key_label_pressed);
 	ClassDB::bind_method(D_METHOD("is_mouse_button_pressed", "button"), &Input::is_mouse_button_pressed);
 	ClassDB::bind_method(D_METHOD("is_joy_button_pressed", "device", "button"), &Input::is_joy_button_pressed);
 	ClassDB::bind_method(D_METHOD("is_action_pressed", "action", "exact_match"), &Input::is_action_pressed, DEFVAL(false));
@@ -250,6 +251,11 @@ bool Input::is_physical_key_pressed(Key p_keycode) const {
 	return physical_keys_pressed.has(p_keycode);
 }
 
+bool Input::is_key_label_pressed(Key p_keycode) const {
+	_THREAD_SAFE_METHOD_
+	return key_label_pressed.has(p_keycode);
+}
+
 bool Input::is_mouse_button_pressed(MouseButton p_button) const {
 	_THREAD_SAFE_METHOD_
 	return mouse_button_mask.has_flag(mouse_button_to_mask(p_button));
@@ -343,8 +349,8 @@ float Input::get_axis(const StringName &p_negative_action, const StringName &p_p
 
 Vector2 Input::get_vector(const StringName &p_negative_x, const StringName &p_positive_x, const StringName &p_negative_y, const StringName &p_positive_y, float p_deadzone) const {
 	Vector2 vector = Vector2(
-			get_action_raw_strength(p_positive_x) - get_action_raw_strength(p_negative_x),
-			get_action_raw_strength(p_positive_y) - get_action_raw_strength(p_negative_y));
+			get_action_strength(p_positive_x) - get_action_strength(p_negative_x),
+			get_action_strength(p_positive_y) - get_action_strength(p_negative_y));
 
 	if (p_deadzone < 0.0f) {
 		// If the deadzone isn't specified, get it from the average of the actions.
@@ -497,6 +503,13 @@ void Input::_parse_input_event_impl(const Ref<InputEvent> &p_event, bool p_is_em
 			physical_keys_pressed.insert(k->get_physical_keycode());
 		} else {
 			physical_keys_pressed.erase(k->get_physical_keycode());
+		}
+	}
+	if (k.is_valid() && !k->is_echo() && k->get_key_label() != Key::NONE) {
+		if (k->is_pressed()) {
+			key_label_pressed.insert(k->get_key_label());
+		} else {
+			key_label_pressed.erase(k->get_key_label());
 		}
 	}
 
@@ -919,6 +932,7 @@ void Input::release_pressed_events() {
 
 	keys_pressed.clear();
 	physical_keys_pressed.clear();
+	key_label_pressed.clear();
 	joy_buttons_pressed.clear();
 	_joy_axis.clear();
 

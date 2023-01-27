@@ -451,6 +451,15 @@ static void _call_object(Object *p_object, const StringName &p_method, const Vec
 	}
 }
 
+Variant AnimationPlayer::post_process_key_value(const Ref<Animation> &p_anim, int p_track, Variant p_value, const Object *p_object, int p_object_idx) {
+	Variant res;
+	if (GDVIRTUAL_CALL(_post_process_key_value, p_anim, p_track, p_value, const_cast<Object *>(p_object), p_object_idx, res)) {
+		return res;
+	}
+
+	return _post_process_key_value(p_anim, p_track, p_value, p_object, p_object_idx);
+}
+
 Variant AnimationPlayer::_post_process_key_value(const Ref<Animation> &p_anim, int p_track, Variant p_value, const Object *p_object, int p_object_idx) {
 	switch (p_anim->track_get_type(p_track)) {
 #ifndef _3D_DISABLED
@@ -473,7 +482,9 @@ void AnimationPlayer::_animation_process_animation(AnimationData *p_anim, double
 	ERR_FAIL_COND(p_anim->node_cache.size() != p_anim->animation->get_track_count());
 
 	Animation *a = p_anim->animation.operator->();
+#ifdef TOOLS_ENABLED
 	bool can_call = is_inside_tree() && !Engine::get_singleton()->is_editor_hint();
+#endif // TOOLS_ENABLED
 	bool backward = signbit(p_delta);
 
 	for (int i = 0; i < a->get_track_count(); i++) {
@@ -512,7 +523,7 @@ void AnimationPlayer::_animation_process_animation(AnimationData *p_anim, double
 				if (err != OK) {
 					continue;
 				}
-				loc = _post_process_key_value(a, i, loc, nc->node_3d, nc->bone_idx);
+				loc = post_process_key_value(a, i, loc, nc->node_3d, nc->bone_idx);
 
 				if (nc->accum_pass != accum_pass) {
 					ERR_CONTINUE(cache_update_size >= NODE_CACHE_UPDATE_MAX);
@@ -540,7 +551,7 @@ void AnimationPlayer::_animation_process_animation(AnimationData *p_anim, double
 				if (err != OK) {
 					continue;
 				}
-				rot = _post_process_key_value(a, i, rot, nc->node_3d, nc->bone_idx);
+				rot = post_process_key_value(a, i, rot, nc->node_3d, nc->bone_idx);
 
 				if (nc->accum_pass != accum_pass) {
 					ERR_CONTINUE(cache_update_size >= NODE_CACHE_UPDATE_MAX);
@@ -568,7 +579,7 @@ void AnimationPlayer::_animation_process_animation(AnimationData *p_anim, double
 				if (err != OK) {
 					continue;
 				}
-				scale = _post_process_key_value(a, i, scale, nc->node_3d, nc->bone_idx);
+				scale = post_process_key_value(a, i, scale, nc->node_3d, nc->bone_idx);
 
 				if (nc->accum_pass != accum_pass) {
 					ERR_CONTINUE(cache_update_size >= NODE_CACHE_UPDATE_MAX);
@@ -596,7 +607,7 @@ void AnimationPlayer::_animation_process_animation(AnimationData *p_anim, double
 				if (err != OK) {
 					continue;
 				}
-				blend = _post_process_key_value(a, i, blend, nc->node_blend_shape, nc->blend_shape_idx);
+				blend = post_process_key_value(a, i, blend, nc->node_blend_shape, nc->blend_shape_idx);
 
 				if (nc->accum_pass != accum_pass) {
 					ERR_CONTINUE(cache_update_size >= NODE_CACHE_UPDATE_MAX);
@@ -649,7 +660,7 @@ void AnimationPlayer::_animation_process_animation(AnimationData *p_anim, double
 					if (p_time < first_key_time) {
 						double c = Math::ease(p_time / first_key_time, transition);
 						Variant first_value = a->track_get_key_value(i, first_key);
-						first_value = _post_process_key_value(a, i, first_value, nc->node);
+						first_value = post_process_key_value(a, i, first_value, nc->node);
 						Variant interp_value = Animation::interpolate_variant(pa->capture, first_value, c);
 						if (pa->accum_pass != accum_pass) {
 							ERR_CONTINUE(cache_update_prop_size >= NODE_CACHE_UPDATE_MAX);
@@ -670,7 +681,7 @@ void AnimationPlayer::_animation_process_animation(AnimationData *p_anim, double
 					if (value == Variant()) {
 						continue;
 					}
-					value = _post_process_key_value(a, i, value, nc->node);
+					value = post_process_key_value(a, i, value, nc->node);
 
 					if (pa->accum_pass != accum_pass) {
 						ERR_CONTINUE(cache_update_prop_size >= NODE_CACHE_UPDATE_MAX);
@@ -701,7 +712,7 @@ void AnimationPlayer::_animation_process_animation(AnimationData *p_anim, double
 
 					for (int &F : indices) {
 						Variant value = a->track_get_key_value(i, F);
-						value = _post_process_key_value(a, i, value, nc->node);
+						value = post_process_key_value(a, i, value, nc->node);
 						switch (pa->special) {
 							case SP_NONE: {
 								bool valid;
@@ -745,11 +756,13 @@ void AnimationPlayer::_animation_process_animation(AnimationData *p_anim, double
 
 			} break;
 			case Animation::TYPE_METHOD: {
-				if (!nc->node || is_stopping) {
+#ifdef TOOLS_ENABLED
+				if (!can_call) {
 					continue;
 				}
-				if (!p_is_current) {
-					break;
+#endif // TOOLS_ENABLED
+				if (!p_is_current || !nc->node || is_stopping) {
+					continue;
 				}
 
 				List<int> indices;
@@ -772,16 +785,12 @@ void AnimationPlayer::_animation_process_animation(AnimationData *p_anim, double
 				for (int &E : indices) {
 					StringName method = a->method_track_get_name(i, E);
 					Vector<Variant> params = a->method_track_get_params(i, E);
-
 #ifdef DEBUG_ENABLED
 					if (!nc->node->has_method(method)) {
 						ERR_PRINT("Invalid method call '" + method + "'. '" + a->get_name() + "' at node '" + get_path() + "'.");
 					}
 #endif
-
-					if (can_call) {
-						_call_object(nc->node, method, params, method_call_mode == ANIMATION_METHOD_CALL_DEFERRED);
-					}
+					_call_object(nc->node, method, params, method_call_mode == ANIMATION_METHOD_CALL_DEFERRED);
 				}
 
 			} break;
@@ -796,7 +805,7 @@ void AnimationPlayer::_animation_process_animation(AnimationData *p_anim, double
 				TrackNodeCache::BezierAnim *ba = &E->value;
 
 				real_t bezier = a->bezier_track_interpolate(i, p_time);
-				bezier = _post_process_key_value(a, i, bezier, nc->node);
+				bezier = post_process_key_value(a, i, bezier, nc->node);
 				if (ba->accum_pass != accum_pass) {
 					ERR_CONTINUE(cache_update_bezier_size >= NODE_CACHE_UPDATE_MAX);
 					cache_update_bezier[cache_update_bezier_size++] = ba;
@@ -813,7 +822,11 @@ void AnimationPlayer::_animation_process_animation(AnimationData *p_anim, double
 				}
 
 				if (p_seeked) {
-					//find whatever should be playing
+#ifdef TOOLS_ENABLED
+					if (!can_call) {
+						continue; // To avoid spamming the preview in editor.
+					}
+#endif // TOOLS_ENABLED
 					int idx = a->track_find_key(i, p_time);
 					if (idx < 0) {
 						continue;
@@ -2189,6 +2202,8 @@ void AnimationPlayer::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("seek", "seconds", "update"), &AnimationPlayer::seek, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("advance", "delta"), &AnimationPlayer::advance);
+
+	GDVIRTUAL_BIND(_post_process_key_value, "animation", "track", "value", "object", "object_idx");
 
 	ADD_PROPERTY(PropertyInfo(Variant::NODE_PATH, "root_node"), "set_root", "get_root");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING_NAME, "current_animation", PROPERTY_HINT_ENUM, "", PROPERTY_USAGE_EDITOR), "set_current_animation", "get_current_animation");

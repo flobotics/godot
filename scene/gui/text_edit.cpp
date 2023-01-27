@@ -1319,11 +1319,12 @@ void TextEdit::_notification(int p_what) {
 						if (!clipped && get_caret_line(c) == line && carets_wrap_index[c] == line_wrap_index) {
 							carets.write[c].draw_pos.y = ofs_y + ldata->get_line_descent(line_wrap_index);
 
-							if (ime_text.length() == 0) {
+							if (ime_text.is_empty() || ime_selection.y == 0) {
+								// Normal caret.
 								CaretInfo ts_caret;
-								if (str.length() != 0) {
+								if (!str.is_empty() || !ime_text.is_empty()) {
 									// Get carets.
-									ts_caret = TS->shaped_text_get_carets(rid, get_caret_column(c));
+									ts_caret = TS->shaped_text_get_carets(rid, ime_text.is_empty() ? get_caret_column(c) : get_caret_column(c) + ime_selection.x);
 								} else {
 									// No carets, add one at the start.
 									int h = font->get_height(font_size);
@@ -1426,7 +1427,8 @@ void TextEdit::_notification(int p_what) {
 										}
 									}
 								}
-							} else {
+							}
+							if (!ime_text.is_empty()) {
 								{
 									// IME Intermediate text range.
 									Vector<Vector2> sel = TS->shaped_text_get_selection(rid, get_caret_column(c), get_caret_column(c) + ime_text.length());
@@ -1545,6 +1547,10 @@ void TextEdit::_notification(int p_what) {
 			if (has_focus()) {
 				ime_text = DisplayServer::get_singleton()->ime_get_text();
 				ime_selection = DisplayServer::get_singleton()->ime_get_selection();
+
+				if (!ime_text.is_empty()) {
+					delete_selection();
+				}
 
 				for (int i = 0; i < carets.size(); i++) {
 					String t;
@@ -3538,6 +3544,19 @@ void TextEdit::insert_text_at_caret(const String &p_text, int p_caret) {
 
 		adjust_carets_after_edit(i, new_line, new_column, from_line, from_col);
 	}
+
+	if (!ime_text.is_empty()) {
+		for (int i = 0; i < carets.size(); i++) {
+			String t;
+			if (get_caret_column(i) >= 0) {
+				t = text[get_caret_line(i)].substr(0, get_caret_column(i)) + ime_text + text[get_caret_line(i)].substr(get_caret_column(i), text[get_caret_line(i)].length());
+			} else {
+				t = ime_text;
+			}
+			text.invalidate_cache(get_caret_line(i), get_caret_column(i), true, t, structured_text_parser(st_parser, st_args, t));
+		}
+	}
+
 	end_complex_operation();
 	queue_redraw();
 }
@@ -6368,7 +6387,7 @@ void TextEdit::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "draw_tabs"), "set_draw_tabs", "is_drawing_tabs");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "draw_spaces"), "set_draw_spaces", "is_drawing_spaces");
 
-	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "syntax_highlighter", PROPERTY_HINT_RESOURCE_TYPE, "SyntaxHighlighter", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_DO_NOT_SHARE_ON_DUPLICATE), "set_syntax_highlighter", "get_syntax_highlighter");
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "syntax_highlighter", PROPERTY_HINT_RESOURCE_TYPE, "SyntaxHighlighter", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_ALWAYS_DUPLICATE), "set_syntax_highlighter", "get_syntax_highlighter");
 
 	ADD_GROUP("Scroll", "scroll_");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "scroll_smooth"), "set_smooth_scroll_enabled", "is_smooth_scroll_enabled");

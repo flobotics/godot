@@ -185,6 +185,7 @@ static bool init_maximized = false;
 static bool init_windowed = false;
 static bool init_always_on_top = false;
 static bool init_use_custom_pos = false;
+static bool init_use_custom_screen = false;
 static Vector2 init_custom_pos;
 
 // Debug
@@ -206,6 +207,11 @@ static bool dump_gdextension_interface = false;
 static bool dump_extension_api = false;
 #endif
 bool profile_gpu = false;
+
+// Constants.
+
+static const String NULL_DISPLAY_DRIVER("headless");
+static const String NULL_AUDIO_DRIVER("Dummy");
 
 /* Helper methods */
 
@@ -523,7 +529,11 @@ Error Main::test_setup() {
 		}
 	}
 	if (text_driver_idx >= 0) {
-		TextServerManager::get_singleton()->set_primary_interface(TextServerManager::get_singleton()->get_interface(text_driver_idx));
+		Ref<TextServer> ts = TextServerManager::get_singleton()->get_interface(text_driver_idx);
+		TextServerManager::get_singleton()->set_primary_interface(ts);
+		if (ts->has_feature(TextServer::FEATURE_USE_SUPPORT_DATA)) {
+			ts->load_support_data("res://" + ts->get_support_data_filename());
+		}
 	} else {
 		ERR_FAIL_V_MSG(ERR_CANT_CREATE, "TextServer: Unable to create TextServer interface.");
 	}
@@ -964,6 +974,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 
 			if (I->next()) {
 				init_screen = I->next()->get().to_int();
+				init_use_custom_screen = true;
 
 				N = I->next()->next();
 			} else {
@@ -997,8 +1008,8 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 
 		} else if (I->get() == "--headless") { // enable headless mode (no audio, no rendering).
 
-			audio_driver = "Dummy";
-			display_driver = "headless";
+			audio_driver = NULL_AUDIO_DRIVER;
+			display_driver = NULL_DISPLAY_DRIVER;
 
 		} else if (I->get() == "--profiling") { // enable profiling
 
@@ -1133,8 +1144,8 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 
 			// `--doctool` implies `--headless` to avoid spawning an unnecessary window
 			// and speed up class reference generation.
-			audio_driver = "Dummy";
-			display_driver = "headless";
+			audio_driver = NULL_AUDIO_DRIVER;
+			display_driver = NULL_DISPLAY_DRIVER;
 			main_args.push_back(I->get());
 #endif
 		} else if (I->get() == "--path") { // set path of project to start or edit
@@ -1370,6 +1381,11 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	register_core_extensions(); // core extensions must be registered after globals setup and before display
 
 	ResourceUID::get_singleton()->load_from_cache(); // load UUIDs from cache.
+
+	if (ProjectSettings::get_singleton()->has_custom_feature("dedicated_server")) {
+		audio_driver = NULL_AUDIO_DRIVER;
+		display_driver = NULL_DISPLAY_DRIVER;
+	}
 
 	GLOBAL_DEF(PropertyInfo(Variant::INT, "network/limits/debugger/max_chars_per_second", PROPERTY_HINT_RANGE, "0, 4096, 1, or_greater"), 32768);
 	GLOBAL_DEF(PropertyInfo(Variant::INT, "network/limits/debugger/max_queued_messages", PROPERTY_HINT_RANGE, "0, 8192, 1, or_greater"), 2048);
@@ -1669,7 +1685,23 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 			window_flags |= DisplayServer::WINDOW_FLAG_NO_FOCUS_BIT;
 		}
 		window_mode = (DisplayServer::WindowMode)(GLOBAL_GET("display/window/size/mode").operator int());
-		init_screen = GLOBAL_GET("display/window/size/initial_screen").operator int();
+		int initial_position_type = GLOBAL_GET("display/window/size/initial_position_type").operator int();
+		if (initial_position_type == 0) {
+			if (!init_use_custom_pos) {
+				init_custom_pos = GLOBAL_GET("display/window/size/initial_position").operator Vector2i();
+				init_use_custom_pos = true;
+			}
+		} else if (initial_position_type == 1) {
+			if (!init_use_custom_screen) {
+				init_screen = DisplayServer::SCREEN_PRIMARY;
+				init_use_custom_screen = true;
+			}
+		} else if (initial_position_type == 2) {
+			if (!init_use_custom_screen) {
+				init_screen = GLOBAL_GET("display/window/size/initial_screen").operator int();
+				init_use_custom_screen = true;
+			}
+		}
 	}
 
 	GLOBAL_DEF("internationalization/locale/include_text_server_data", false);
@@ -1708,7 +1740,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 
 	// Display driver, e.g. X11, Wayland.
 	// Make sure that headless is the last one, which it is assumed to be by design.
-	DEV_ASSERT(String("headless") == DisplayServer::get_create_function_name(DisplayServer::get_create_function_count() - 1));
+	DEV_ASSERT(NULL_DISPLAY_DRIVER == DisplayServer::get_create_function_name(DisplayServer::get_create_function_count() - 1));
 	for (int i = 0; i < DisplayServer::get_create_function_count(); i++) {
 		String name = DisplayServer::get_create_function_name(i);
 		if (display_driver == name) {
@@ -1733,7 +1765,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	}
 
 	// Make sure that dummy is the last one, which it is assumed to be by design.
-	DEV_ASSERT(String("Dummy") == AudioDriverManager::get_driver(AudioDriverManager::get_driver_count() - 1)->get_name());
+	DEV_ASSERT(NULL_AUDIO_DRIVER == AudioDriverManager::get_driver(AudioDriverManager::get_driver_count() - 1)->get_name());
 	for (int i = 0; i < AudioDriverManager::get_driver_count(); i++) {
 		if (audio_driver == AudioDriverManager::get_driver(i)->get_name()) {
 			audio_driver_idx = i;
@@ -2147,7 +2179,7 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 	if (id) {
 		agile_input_event_flushing = GLOBAL_DEF("input_devices/buffering/agile_event_flushing", false);
 
-		if (bool(GLOBAL_DEF("input_devices/pointing/emulate_touch_from_mouse", false)) &&
+		if (bool(GLOBAL_DEF_BASIC("input_devices/pointing/emulate_touch_from_mouse", false)) &&
 				!(editor || project_manager)) {
 			if (!DisplayServer::get_singleton()->is_touchscreen_available()) {
 				//only if no touchscreen ui hint, set emulation
@@ -2155,7 +2187,7 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 			}
 		}
 
-		id->set_emulate_mouse_from_touch(bool(GLOBAL_DEF("input_devices/pointing/emulate_mouse_from_touch", true)));
+		id->set_emulate_mouse_from_touch(bool(GLOBAL_DEF_BASIC("input_devices/pointing/emulate_mouse_from_touch", true)));
 	}
 
 	MAIN_PRINT("Main: Load Translations and Remaps");
@@ -2220,7 +2252,11 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 		}
 	}
 	if (text_driver_idx >= 0) {
-		TextServerManager::get_singleton()->set_primary_interface(TextServerManager::get_singleton()->get_interface(text_driver_idx));
+		Ref<TextServer> ts = TextServerManager::get_singleton()->get_interface(text_driver_idx);
+		TextServerManager::get_singleton()->set_primary_interface(ts);
+		if (ts->has_feature(TextServer::FEATURE_USE_SUPPORT_DATA)) {
+			ts->load_support_data("res://" + ts->get_support_data_filename());
+		}
 	} else {
 		ERR_FAIL_V_MSG(ERR_CANT_CREATE, "TextServer: Unable to create TextServer interface.");
 	}

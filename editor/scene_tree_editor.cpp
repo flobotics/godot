@@ -677,7 +677,7 @@ bool SceneTreeEditor::_item_matches_all_terms(TreeItem *p_item, PackedStringArra
 	for (int i = 0; i < p_terms.size(); i++) {
 		String term = p_terms[i];
 
-		// Recognise special filter.
+		// Recognize special filter.
 		if (term.contains(":") && !term.get_slicec(':', 0).is_empty()) {
 			String parameter = term.get_slicec(':', 0);
 			String argument = term.get_slicec(':', 1);
@@ -971,7 +971,7 @@ void SceneTreeEditor::_renamed() {
 	String raw_new_name = which->get_text(0);
 	if (raw_new_name.strip_edges().is_empty()) {
 		// If name is empty, fallback to class name.
-		if (GLOBAL_GET("editor/node_naming/name_casing").operator int() != NAME_CASING_PASCAL_CASE) {
+		if (GLOBAL_GET("editor/naming/node_name_casing").operator int() != NAME_CASING_PASCAL_CASE) {
 			raw_new_name = Node::adjust_name_casing(n->get_class());
 		} else {
 			raw_new_name = n->get_class();

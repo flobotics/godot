@@ -246,7 +246,7 @@ public:
 	}
 };
 
-bool CanvasItemEditor::_is_node_locked(const Node *p_node) {
+bool CanvasItemEditor::_is_node_locked(const Node *p_node) const {
 	return p_node->get_meta("_edit_lock_", false);
 }
 
@@ -770,7 +770,7 @@ bool CanvasItemEditor::_select_click_on_item(CanvasItem *item, Point2 p_click_po
 	return still_selected;
 }
 
-List<CanvasItem *> CanvasItemEditor::_get_edited_canvas_items(bool retrieve_locked, bool remove_canvas_item_if_parent_in_selection) {
+List<CanvasItem *> CanvasItemEditor::_get_edited_canvas_items(bool retrieve_locked, bool remove_canvas_item_if_parent_in_selection) const {
 	List<CanvasItem *> selection;
 	for (const KeyValue<Node *, Object *> &E : editor_selection->get_selection()) {
 		CanvasItem *ci = Object::cast_to<CanvasItem>(E.key);
@@ -1226,7 +1226,6 @@ bool CanvasItemEditor::_gui_input_zoom_or_pan(const Ref<InputEvent> &p_event, bo
 	bool panner_active = panner->gui_input(p_event, warped_panning ? viewport->get_global_rect() : Rect2());
 	if (panner->is_panning() != pan_pressed) {
 		pan_pressed = panner->is_panning();
-		_update_cursor();
 	}
 
 	if (panner_active) {
@@ -1260,57 +1259,25 @@ bool CanvasItemEditor::_gui_input_zoom_or_pan(const Ref<InputEvent> &p_event, bo
 		}
 	}
 
-	Ref<InputEventMagnifyGesture> magnify_gesture = p_event;
-	if (magnify_gesture.is_valid() && !p_already_accepted) {
-		// Zoom gesture
-		_zoom_on_position(zoom * magnify_gesture->get_factor(), magnify_gesture->get_position());
-		return true;
-	}
-
-	Ref<InputEventPanGesture> pan_gesture = p_event;
-	if (pan_gesture.is_valid() && !p_already_accepted) {
-		// If ctrl key pressed, then zoom instead of pan.
-		if (pan_gesture->is_ctrl_pressed()) {
-			const real_t factor = pan_gesture->get_delta().y;
-
-			zoom_widget->set_zoom_by_increments(1);
-			if (factor != 1.f) {
-				zoom_widget->set_zoom(zoom * ((zoom_widget->get_zoom() / zoom - 1.f) * factor + 1.f));
-			}
-			_zoom_on_position(zoom_widget->get_zoom(), pan_gesture->get_position());
-
-			return true;
-		}
-
-		// Pan gesture
-		const Vector2 delta = (pan_speed / zoom) * pan_gesture->get_delta();
-		view_offset.x += delta.x;
-		view_offset.y += delta.y;
-		update_viewport();
-		return true;
-	}
-
 	return false;
 }
 
-void CanvasItemEditor::_scroll_callback(Vector2 p_scroll_vec, bool p_alt) {
-	_pan_callback(-p_scroll_vec * pan_speed);
-}
-
-void CanvasItemEditor::_pan_callback(Vector2 p_scroll_vec) {
+void CanvasItemEditor::_pan_callback(Vector2 p_scroll_vec, Ref<InputEvent> p_event) {
 	view_offset.x -= p_scroll_vec.x / zoom;
 	view_offset.y -= p_scroll_vec.y / zoom;
 	update_viewport();
 }
 
-void CanvasItemEditor::_zoom_callback(Vector2 p_scroll_vec, Vector2 p_origin, bool p_alt) {
-	int scroll_sign = (int)SIGN(p_scroll_vec.y);
-	// Inverted so that scrolling up (-1) zooms in, scrolling down (+1) zooms out.
-	zoom_widget->set_zoom_by_increments(-scroll_sign, p_alt);
-	if (!Math::is_equal_approx(ABS(p_scroll_vec.y), (real_t)1.0)) {
-		// Handle high-precision (analog) scrolling.
-		zoom_widget->set_zoom(zoom * ((zoom_widget->get_zoom() / zoom - 1.f) * ABS(p_scroll_vec.y) + 1.f));
+void CanvasItemEditor::_zoom_callback(float p_zoom_factor, Vector2 p_origin, Ref<InputEvent> p_event) {
+	Ref<InputEventMouseButton> mb = p_event;
+	if (mb.is_valid()) {
+		// Special behvior for scroll events, as the zoom_by_increment method can smartly end up on powers of two.
+		int increment = p_zoom_factor > 1.0 ? 1 : -1;
+		zoom_widget->set_zoom_by_increments(increment, mb->is_alt_pressed());
+	} else {
+		zoom_widget->set_zoom(zoom_widget->get_zoom() * p_zoom_factor);
 	}
+
 	_zoom_on_position(zoom_widget->get_zoom(), p_origin);
 }
 
@@ -2570,8 +2537,10 @@ void CanvasItemEditor::_gui_input_viewport(const Ref<InputEvent> &p_event) {
 	// Handles the mouse hovering
 	_gui_input_hover(p_event);
 
-	// Change the cursor
-	_update_cursor();
+	if (mb.is_valid()) {
+		// Update the default cursor.
+		_update_cursor();
+	}
 
 	// Grab focus
 	if (!viewport->has_focus() && (!get_viewport()->gui_get_focus_owner() || !get_viewport()->gui_get_focus_owner()->is_text_field())) {
@@ -2580,6 +2549,31 @@ void CanvasItemEditor::_gui_input_viewport(const Ref<InputEvent> &p_event) {
 }
 
 void CanvasItemEditor::_update_cursor() {
+	// Choose the correct default cursor.
+	CursorShape c = CURSOR_ARROW;
+	switch (tool) {
+		case TOOL_MOVE:
+			c = CURSOR_MOVE;
+			break;
+		case TOOL_EDIT_PIVOT:
+			c = CURSOR_CROSS;
+			break;
+		case TOOL_PAN:
+			c = CURSOR_DRAG;
+			break;
+		case TOOL_RULER:
+			c = CURSOR_CROSS;
+			break;
+		default:
+			break;
+	}
+	if (pan_pressed) {
+		c = CURSOR_DRAG;
+	}
+	set_default_cursor_shape(c);
+}
+
+Control::CursorShape CanvasItemEditor::get_cursor_shape(const Point2 &p_pos) const {
 	// Compute an eventual rotation of the cursor
 	const CursorShape rotation_array[4] = { CURSOR_HSIZE, CURSOR_BDIAGSIZE, CURSOR_VSIZE, CURSOR_FDIAGSIZE };
 	int rotation_array_index = 0;
@@ -2601,26 +2595,8 @@ void CanvasItemEditor::_update_cursor() {
 	}
 
 	// Choose the correct cursor
-	CursorShape c = CURSOR_ARROW;
+	CursorShape c = get_default_cursor_shape();
 	switch (drag_type) {
-		case DRAG_NONE:
-			switch (tool) {
-				case TOOL_MOVE:
-					c = CURSOR_MOVE;
-					break;
-				case TOOL_EDIT_PIVOT:
-					c = CURSOR_CROSS;
-					break;
-				case TOOL_PAN:
-					c = CURSOR_DRAG;
-					break;
-				case TOOL_RULER:
-					c = CURSOR_CROSS;
-					break;
-				default:
-					break;
-			}
-			break;
 		case DRAG_LEFT:
 		case DRAG_RIGHT:
 			c = rotation_array[rotation_array_index];
@@ -2662,16 +2638,7 @@ void CanvasItemEditor::_update_cursor() {
 	if (pan_pressed) {
 		c = CURSOR_DRAG;
 	}
-
-	if (c != viewport->get_default_cursor_shape()) {
-		viewport->set_default_cursor_shape(c);
-
-		// Force refresh cursor if it's over the viewport.
-		if (viewport->get_global_rect().has_point(get_global_mouse_position())) {
-			DisplayServer::CursorShape ds_cursor_shape = (DisplayServer::CursorShape)viewport->get_default_cursor_shape();
-			DisplayServer::get_singleton()->cursor_set_shape(ds_cursor_shape);
-		}
-	}
+	return c;
 }
 
 void CanvasItemEditor::_draw_text_at_position(Point2 p_position, String p_string, Side p_side) {
@@ -3869,7 +3836,7 @@ void CanvasItemEditor::_update_editor_settings() {
 	context_menu_panel->add_theme_style_override("panel", get_theme_stylebox(SNAME("ContextualToolbar"), SNAME("EditorStyles")));
 
 	panner->setup((ViewPanner::ControlScheme)EDITOR_GET("editors/panning/2d_editor_panning_scheme").operator int(), ED_GET_SHORTCUT("canvas_item_editor/pan_view"), bool(EDITOR_GET("editors/panning/simple_panning")));
-	pan_speed = int(EDITOR_GET("editors/panning/2d_editor_pan_speed"));
+	panner->set_scroll_speed(EDITOR_GET("editors/panning/2d_editor_pan_speed"));
 	warped_panning = bool(EDITOR_GET("editors/panning/warped_mouse_panning"));
 }
 
@@ -3958,8 +3925,8 @@ void CanvasItemEditor::_notification(int p_what) {
 
 		case NOTIFICATION_ENTER_TREE: {
 			select_sb->set_texture(get_theme_icon(SNAME("EditorRect2D"), SNAME("EditorIcons")));
-			select_sb->set_margin_size_all(4);
-			select_sb->set_default_margin_all(4);
+			select_sb->set_texture_margin_all(4);
+			select_sb->set_content_margin_all(4);
 
 			AnimationPlayerEditor::get_singleton()->get_track_editor()->connect("visibility_changed", callable_mp(this, &CanvasItemEditor::_keying_changed));
 			_keying_changed();
@@ -3990,6 +3957,10 @@ void CanvasItemEditor::_selection_changed() {
 }
 
 void CanvasItemEditor::edit(CanvasItem *p_canvas_item) {
+	if (!p_canvas_item) {
+		return;
+	}
+
 	Array selection = editor_selection->get_selected_nodes();
 	if (selection.size() != 1 || Object::cast_to<Node>(selection[0]) != p_canvas_item) {
 		_reset_drag();
@@ -5056,7 +5027,7 @@ CanvasItemEditor::CanvasItemEditor() {
 	zoom_widget->connect("zoom_changed", callable_mp(this, &CanvasItemEditor::_update_zoom));
 
 	panner.instantiate();
-	panner->set_callbacks(callable_mp(this, &CanvasItemEditor::_scroll_callback), callable_mp(this, &CanvasItemEditor::_pan_callback), callable_mp(this, &CanvasItemEditor::_zoom_callback));
+	panner->set_callbacks(callable_mp(this, &CanvasItemEditor::_pan_callback), callable_mp(this, &CanvasItemEditor::_zoom_callback));
 
 	viewport = memnew(CanvasItemEditorViewport(this));
 	viewport_scrollable->add_child(viewport);
@@ -5925,7 +5896,7 @@ CanvasItemEditorViewport::CanvasItemEditorViewport(CanvasItemEditor *p_canvas_it
 	EditorNode::get_singleton()->get_gui_base()->add_child(selector);
 	selector->set_title(TTR("Change Default Type"));
 	selector->connect("confirmed", callable_mp(this, &CanvasItemEditorViewport::_on_change_type_confirmed));
-	selector->connect("cancelled", callable_mp(this, &CanvasItemEditorViewport::_on_change_type_closed));
+	selector->connect("canceled", callable_mp(this, &CanvasItemEditorViewport::_on_change_type_closed));
 
 	VBoxContainer *vbc = memnew(VBoxContainer);
 	selector->add_child(vbc);

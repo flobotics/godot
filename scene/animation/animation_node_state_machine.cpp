@@ -212,7 +212,7 @@ StringName AnimationNodeStateMachinePlayback::get_current_node() const {
 	return current;
 }
 
-StringName AnimationNodeStateMachinePlayback::get_blend_from_node() const {
+StringName AnimationNodeStateMachinePlayback::get_fading_from_node() const {
 	return fading_from;
 }
 
@@ -226,6 +226,22 @@ float AnimationNodeStateMachinePlayback::get_current_play_pos() const {
 
 float AnimationNodeStateMachinePlayback::get_current_length() const {
 	return len_current;
+}
+
+float AnimationNodeStateMachinePlayback::get_fade_from_play_pos() const {
+	return pos_fade_from;
+}
+
+float AnimationNodeStateMachinePlayback::get_fade_from_length() const {
+	return len_fade_from;
+}
+
+float AnimationNodeStateMachinePlayback::get_fading_time() const {
+	return fading_time;
+}
+
+float AnimationNodeStateMachinePlayback::get_fading_pos() const {
+	return fading_pos;
 }
 
 bool AnimationNodeStateMachinePlayback::_travel(AnimationNodeStateMachine *p_state_machine, const StringName &p_travel) {
@@ -411,9 +427,11 @@ double AnimationNodeStateMachinePlayback::_process(AnimationNodeStateMachine *p_
 				// can't travel, then teleport
 				if (p_state_machine->states.has(travel_request)) {
 					path.clear();
-					current = travel_request;
-					play_start = true;
-					reset_request = reset_request_on_teleport;
+					if (current != travel_request || reset_request_on_teleport) {
+						current = travel_request;
+						play_start = true;
+						reset_request = reset_request_on_teleport;
+					}
 				} else {
 					StringName node = travel_request;
 					travel_request = StringName();
@@ -464,7 +482,17 @@ double AnimationNodeStateMachinePlayback::_process(AnimationNodeStateMachine *p_
 
 	if (fading_from != StringName()) {
 		double fade_blend_inv = 1.0 - fade_blend;
-		p_state_machine->blend_node(fading_from, p_state_machine->states[fading_from].node, p_time, p_seek, p_is_external_seeking, Math::is_zero_approx(fade_blend_inv) ? CMP_EPSILON : fade_blend_inv, AnimationNode::FILTER_IGNORE, true); // Blend values must be more than CMP_EPSILON to process discrete keys in edge.
+		float fading_from_rem = 0.0;
+		fading_from_rem = p_state_machine->blend_node(fading_from, p_state_machine->states[fading_from].node, p_time, p_seek, p_is_external_seeking, Math::is_zero_approx(fade_blend_inv) ? CMP_EPSILON : fade_blend_inv, AnimationNode::FILTER_IGNORE, true); // Blend values must be more than CMP_EPSILON to process discrete keys in edge.
+		//guess playback position
+		if (fading_from_rem > len_fade_from) { // weird but ok
+			len_fade_from = fading_from_rem;
+		}
+
+		{ //advance and loop check
+			float next_pos = len_fade_from - fading_from_rem;
+			pos_fade_from = next_pos; //looped
+		}
 		if (fade_blend >= 1.0) {
 			fading_from = StringName();
 		}
@@ -631,6 +659,8 @@ double AnimationNodeStateMachinePlayback::_process(AnimationNodeStateMachine *p_
 			}
 
 			current = next;
+			pos_fade_from = pos_current;
+			len_fade_from = len_current;
 
 			if (reset_request) {
 				len_current = p_state_machine->blend_node(current, p_state_machine->states[current].node, 0, true, p_is_external_seeking, CMP_EPSILON, AnimationNode::FILTER_IGNORE, true); // Process next node's first key in here.
@@ -703,6 +733,7 @@ void AnimationNodeStateMachinePlayback::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_current_node"), &AnimationNodeStateMachinePlayback::get_current_node);
 	ClassDB::bind_method(D_METHOD("get_current_play_position"), &AnimationNodeStateMachinePlayback::get_current_play_pos);
 	ClassDB::bind_method(D_METHOD("get_current_length"), &AnimationNodeStateMachinePlayback::get_current_length);
+	ClassDB::bind_method(D_METHOD("get_fading_from_node"), &AnimationNodeStateMachinePlayback::get_fading_from_node);
 	ClassDB::bind_method(D_METHOD("get_travel_path"), &AnimationNodeStateMachinePlayback::get_travel_path);
 }
 
@@ -713,7 +744,7 @@ AnimationNodeStateMachinePlayback::AnimationNodeStateMachinePlayback() {
 ///////////////////////////////////////////////////////
 
 void AnimationNodeStateMachine::get_parameter_list(List<PropertyInfo> *r_list) const {
-	r_list->push_back(PropertyInfo(Variant::OBJECT, playback, PROPERTY_HINT_RESOURCE_TYPE, "AnimationNodeStateMachinePlayback", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_DO_NOT_SHARE_ON_DUPLICATE));
+	r_list->push_back(PropertyInfo(Variant::OBJECT, playback, PROPERTY_HINT_RESOURCE_TYPE, "AnimationNodeStateMachinePlayback", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_ALWAYS_DUPLICATE));
 	List<StringName> advance_conditions;
 	for (int i = 0; i < transitions.size(); i++) {
 		StringName ac = transitions[i].transition->get_advance_condition_name();

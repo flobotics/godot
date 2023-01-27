@@ -112,9 +112,15 @@ layout(location = 9) out highp float dp_clip;
 // !BAS! This needs to become an input once we implement our fallback!
 #define ViewIndex 0
 #endif
+vec3 multiview_uv(vec2 uv) {
+	return vec3(uv, ViewIndex);
+}
 #else
 // Set to zero, not supported in non stereo
 #define ViewIndex 0
+vec2 multiview_uv(vec2 uv) {
+	return uv;
+}
 #endif //USE_MULTIVIEW
 
 invariant gl_Position;
@@ -523,9 +529,15 @@ layout(location = 9) highp in float dp_clip;
 // !BAS! This needs to become an input once we implement our fallback!
 #define ViewIndex 0
 #endif
+vec3 multiview_uv(vec2 uv) {
+	return vec3(uv, ViewIndex);
+}
 #else
 // Set to zero, not supported in non stereo
 #define ViewIndex 0
+vec2 multiview_uv(vec2 uv) {
+	return uv;
+}
 #endif //USE_MULTIVIEW
 
 //defines to keep compatibility with vertex
@@ -1515,6 +1527,8 @@ void main() {
 			} else {
 				shadow = float(shadow1 >> ((i - 4) * 8) & 0xFF) / 255.0;
 			}
+
+			shadow = mix(1.0, shadow, directional_lights.data[i].shadow_opacity);
 #endif
 			blur_shadow(shadow);
 
