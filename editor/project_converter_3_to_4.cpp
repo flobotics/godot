@@ -215,7 +215,6 @@ static const char *gdscript_function_renames[][2] = {
 	{ "_get_configuration_warning", "_get_configuration_warnings" }, // Node
 	{ "_set_current", "set_current" }, // Camera2D
 	{ "_set_editor_description", "set_editor_description" }, // Node
-	{ "_set_playing", "set_playing" }, // AnimatedSprite3D
 	{ "_toplevel_raise_self", "_top_level_raise_self" }, // CanvasItem
 	{ "_update_wrap_at", "_update_wrap_at_column" }, // TextEdit
 	{ "add_animation", "add_animation_library" }, // AnimationPlayer
@@ -1168,6 +1167,7 @@ static const char *gdscript_properties_renames[][2] = {
 	{ "unit_db", "volume_db" }, // AudioStreamPlayer3D
 	{ "unit_offset", "progress_ratio" }, // PathFollow2D, PathFollow3D
 	{ "vseparation", "v_separation" }, // Theme
+	{ "frames", "sprite_frames" }, // AnimatedSprite2D, AnimatedSprite3D
 
 	{ nullptr, nullptr },
 };
@@ -1367,6 +1367,10 @@ static const char *project_settings_renames[][2] = {
 	{ "rendering/vram_compression/import_etc2", "rendering/textures/vram_compression/import_etc2" },
 	{ "rendering/vram_compression/import_pvrtc", "rendering/textures/vram_compression/import_pvrtc" },
 	{ "rendering/vram_compression/import_s3tc", "rendering/textures/vram_compression/import_s3tc" },
+	{ "window/size/width", "window/size/viewport_width" },
+	{ "window/size/height", "window/size/viewport_height" },
+	{ "window/size/test_width", "window/size/window_width_override" },
+	{ "window/size/test_height", "window/size/window_height_override" },
 
 	{ nullptr, nullptr },
 };
