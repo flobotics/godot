@@ -4530,14 +4530,14 @@ bool ShaderLanguage::_check_node_constness(const Node *p_node) const {
 		case Node::TYPE_CONSTANT:
 			break;
 		case Node::TYPE_VARIABLE: {
-			const VariableNode *varn = static_cast<const VariableNode *>(p_node);
-			if (!varn->is_const) {
+			const VariableNode *var_node = static_cast<const VariableNode *>(p_node);
+			if (!var_node->is_const) {
 				return false;
 			}
 		} break;
 		case Node::TYPE_ARRAY: {
-			const ArrayNode *arrn = static_cast<const ArrayNode *>(p_node);
-			if (!arrn->is_const) {
+			const ArrayNode *arr_node = static_cast<const ArrayNode *>(p_node);
+			if (!arr_node->is_const) {
 				return false;
 			}
 		} break;
@@ -8759,6 +8759,10 @@ Error ShaderLanguage::_parse_shader(const HashMap<StringName, FunctionInfo> &p_f
 									new_hint = ShaderNode::Uniform::HINT_NORMAL_ROUGHNESS_TEXTURE;
 									--texture_uniforms;
 									--texture_binding;
+									if (OS::get_singleton()->get_current_rendering_method() == "gl_compatibility") {
+										_set_error(RTR("'hint_normal_roughness_texture is not supported in gl_compatibility shaders."));
+										return ERR_PARSE_ERROR;
+									}
 								} break;
 								case TK_HINT_DEPTH_TEXTURE: {
 									new_hint = ShaderNode::Uniform::HINT_DEPTH_TEXTURE;

@@ -141,12 +141,12 @@ public:
 	virtual double process(double p_time, bool p_seek, bool p_is_external_seeking);
 	virtual String get_caption() const;
 
+	virtual bool add_input(const String &p_name);
+	virtual void remove_input(int p_index);
+	virtual bool set_input_name(int p_input, const String &p_name);
+	virtual String get_input_name(int p_input) const;
 	int get_input_count() const;
-	String get_input_name(int p_input);
-
-	void add_input(const String &p_name);
-	void set_input_name(int p_input, const String &p_name);
-	void remove_input(int p_index);
+	int find_input(const String &p_name) const;
 
 	void set_filter_path(const NodePath &p_path, bool p_enable);
 	bool is_path_filtered(const NodePath &p_path) const;
@@ -253,12 +253,14 @@ private:
 		}
 	};
 
+	// Audio stream information for each audio stream placed on the track.
 	struct PlayingAudioStreamInfo {
-		int64_t index = -1;
+		AudioStreamPlaybackPolyphonic::ID index = -1; // ID retrieved from AudioStreamPlaybackPolyphonic.
 		double start = 0.0;
 		double len = 0.0;
 	};
 
+	// Audio track information for mixng and ending.
 	struct PlayingAudioTrackInfo {
 		HashMap<int, PlayingAudioStreamInfo> stream_info;
 		double length = 0.0;
@@ -272,7 +274,7 @@ private:
 	struct TrackCacheAudio : public TrackCache {
 		Ref<AudioStreamPolyphonic> audio_stream;
 		Ref<AudioStreamPlaybackPolyphonic> audio_stream_playback;
-		HashMap<ObjectID, PlayingAudioTrackInfo> playing_streams; // Animation resource RID & AudioTrack key index: PlayingAudioStreamInfo.
+		HashMap<ObjectID, PlayingAudioTrackInfo> playing_streams; // Key is Animation resource ObjectID.
 
 		TrackCacheAudio() {
 			type = Animation::TYPE_AUDIO;

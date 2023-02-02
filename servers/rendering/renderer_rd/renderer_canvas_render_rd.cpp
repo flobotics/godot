@@ -1431,6 +1431,7 @@ void RendererCanvasRenderRD::canvas_render_items(RID p_to_render_target, Item *p
 					const Item::CommandMesh *cm = static_cast<const Item::CommandMesh *>(c);
 					if (cm->mesh_instance.is_valid()) {
 						mesh_storage->mesh_instance_check_for_update(cm->mesh_instance);
+						mesh_storage->mesh_instance_set_canvas_item_transform(cm->mesh_instance, canvas_transform_inverse * ci->final_transform);
 						update_skeletons = true;
 					}
 				}
@@ -1549,6 +1550,9 @@ void RendererCanvasRenderRD::light_set_texture(RID p_rid, RID p_texture) {
 	if (cl->texture == p_texture) {
 		return;
 	}
+
+	ERR_FAIL_COND(p_texture.is_valid() && !texture_storage->owns_texture(p_texture));
+
 	if (cl->texture.is_valid()) {
 		texture_storage->texture_remove_from_decal_atlas(cl->texture);
 	}

@@ -264,10 +264,6 @@ void GraphEdit::_scroll_moved(double) {
 	top_layer->queue_redraw();
 	minimap->queue_redraw();
 	queue_redraw();
-
-	if (!setting_scroll_ofs) { //in godot, signals on change value are avoided as a convention
-		emit_signal(SNAME("scroll_offset_changed"), get_scroll_ofs());
-	}
 }
 
 void GraphEdit::_update_scroll_offset() {
@@ -290,6 +286,10 @@ void GraphEdit::_update_scroll_offset() {
 	connections_layer->set_position(-Point2(h_scroll->get_value(), v_scroll->get_value()));
 	set_block_minimum_size_adjust(false);
 	awaiting_scroll_offset_update = false;
+
+	if (!setting_scroll_ofs) { //in godot, signals on change value are avoided as a convention
+		emit_signal(SNAME("scroll_offset_changed"), get_scroll_ofs());
+	}
 }
 
 void GraphEdit::_update_scroll() {
@@ -920,7 +920,8 @@ void GraphEdit::_draw_connection_line(CanvasItem *p_where, const Vector2 &p_from
 		scaled_points.push_back(points[i] * p_zoom);
 	}
 
-	p_where->draw_polyline_colors(scaled_points, colors, Math::floor(p_width * get_theme_default_base_scale()), lines_antialiased);
+	// Thickness below 0.5 doesn't look good on the graph or its minimap.
+	p_where->draw_polyline_colors(scaled_points, colors, MAX(0.5, Math::floor(p_width * get_theme_default_base_scale())), lines_antialiased);
 }
 
 void GraphEdit::_connections_layer_draw() {
@@ -1088,7 +1089,7 @@ void GraphEdit::_minimap_draw() {
 			from_color = from_color.lerp(activity_color, E.activity);
 			to_color = to_color.lerp(activity_color, E.activity);
 		}
-		_draw_connection_line(minimap, from_position, to_position, from_color, to_color, 0.1, minimap->_convert_from_graph_position(Vector2(zoom, zoom)).length());
+		_draw_connection_line(minimap, from_position, to_position, from_color, to_color, 0.5, minimap->_convert_from_graph_position(Vector2(zoom, zoom)).length());
 	}
 
 	// Draw the "camera" viewport.
