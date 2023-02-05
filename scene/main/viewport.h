@@ -275,7 +275,6 @@ private:
 
 	Ref<World2D> world_2d;
 
-	Rect2i to_screen_rect;
 	StringName input_group;
 	StringName gui_input_group;
 	StringName shortcut_input_group;
@@ -408,8 +407,6 @@ private:
 	void _perform_drop(Control *p_control = nullptr, Point2 p_pos = Point2());
 	void _gui_cleanup_internal_state(Ref<InputEvent> p_event);
 
-	_FORCE_INLINE_ Transform2D _get_input_pre_xform() const;
-
 	Ref<InputEvent> _make_input_local(const Ref<InputEvent> &ev);
 
 	friend class Control;
@@ -471,7 +468,7 @@ private:
 	uint64_t event_count = 0;
 
 protected:
-	void _set_size(const Size2i &p_size, const Size2i &p_size_2d_override, const Rect2i &p_to_screen_rect, bool p_allocated);
+	void _set_size(const Size2i &p_size, const Size2i &p_size_2d_override, bool p_allocated);
 
 	Size2i _get_size() const;
 	Size2i _get_size_2d_override() const;
@@ -510,7 +507,7 @@ public:
 	void set_global_canvas_transform(const Transform2D &p_transform);
 	Transform2D get_global_canvas_transform() const;
 
-	Transform2D get_final_transform() const;
+	virtual Transform2D get_final_transform() const;
 	void assign_next_enabled_camera_2d(const StringName &p_camera_group);
 
 	void gui_set_root_order_dirty();

@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  rvo_agent.h                                                           */
+/*  nav_agent.cpp                                                         */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,38 +28,43 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef RVO_AGENT_H
-#define RVO_AGENT_H
+#include "nav_agent.h"
 
-#include "core/object/class_db.h"
-#include "nav_rid.h"
+#include "nav_map.h"
 
-#include <Agent.h>
+void NavAgent::set_map(NavMap *p_map) {
+	map = p_map;
+}
 
-class NavMap;
+bool NavAgent::is_map_changed() {
+	if (map) {
+		bool is_changed = map->get_map_update_id() != map_update_id;
+		map_update_id = map->get_map_update_id();
+		return is_changed;
+	} else {
+		return false;
+	}
+}
 
-class RvoAgent : public NavRid {
-	NavMap *map = nullptr;
-	RVO::Agent agent;
-	Callable callback = Callable();
-	uint32_t map_update_id = 0;
+void NavAgent::set_callback(Callable p_callback) {
+	callback = p_callback;
+}
 
-public:
-	void set_map(NavMap *p_map);
-	NavMap *get_map() {
-		return map;
+bool NavAgent::has_callback() const {
+	return callback.is_valid();
+}
+
+void NavAgent::dispatch_callback() {
+	if (!callback.is_valid()) {
+		return;
 	}
 
-	RVO::Agent *get_agent() {
-		return &agent;
-	}
+	Vector3 new_velocity = Vector3(agent.newVelocity_.x(), agent.newVelocity_.y(), agent.newVelocity_.z());
 
-	bool is_map_changed();
-
-	void set_callback(Callable p_callback);
-	bool has_callback() const;
-
-	void dispatch_callback();
-};
-
-#endif // RVO_AGENT_H
+	// Invoke the callback with the new velocity.
+	Variant args[] = { new_velocity };
+	const Variant *args_p[] = { &args[0] };
+	Variant return_value;
+	Callable::CallError call_error;
+	callback.callp(args_p, 1, return_value, call_error);
+}

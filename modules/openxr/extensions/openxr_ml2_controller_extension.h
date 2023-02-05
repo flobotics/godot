@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  rvo_agent.cpp                                                         */
+/*  openxr_ml2_controller_extension.h                                     */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,43 +28,21 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#include "rvo_agent.h"
+#ifndef OPENXR_ML2_CONTROLLER_EXTENSION_H
+#define OPENXR_ML2_CONTROLLER_EXTENSION_H
 
-#include "nav_map.h"
+#include "openxr_extension_wrapper.h"
 
-void RvoAgent::set_map(NavMap *p_map) {
-	map = p_map;
-}
+class OpenXRML2ControllerExtension : public OpenXRExtensionWrapper {
+public:
+	virtual HashMap<String, bool *> get_requested_extensions() override;
 
-bool RvoAgent::is_map_changed() {
-	if (map) {
-		bool is_changed = map->get_map_update_id() != map_update_id;
-		map_update_id = map->get_map_update_id();
-		return is_changed;
-	} else {
-		return false;
-	}
-}
+	bool is_available();
 
-void RvoAgent::set_callback(Callable p_callback) {
-	callback = p_callback;
-}
+	virtual void on_register_metadata() override;
 
-bool RvoAgent::has_callback() const {
-	return callback.is_valid();
-}
+private:
+	bool available = false;
+};
 
-void RvoAgent::dispatch_callback() {
-	if (!callback.is_valid()) {
-		return;
-	}
-
-	Vector3 new_velocity = Vector3(agent.newVelocity_.x(), agent.newVelocity_.y(), agent.newVelocity_.z());
-
-	// Invoke the callback with the new velocity.
-	Variant args[] = { new_velocity };
-	const Variant *args_p[] = { &args[0] };
-	Variant return_value;
-	Callable::CallError call_error;
-	callback.callp(args_p, 1, return_value, call_error);
-}
+#endif // OPENXR_ML2_CONTROLLER_EXTENSION_H
