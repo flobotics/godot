@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="@GDScript" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+<class name="@GDScript" version="4.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
 		Built-in GDScript functions.
 	</brief_description>
@@ -18,12 +18,13 @@
 			<param index="2" name="b8" type="int" />
 			<param index="3" name="a8" type="int" default="255" />
 			<description>
-				Returns a [Color] constructed from red ([param r8]), green ([param g8]), blue ([param b8]), and optionally alpha ([param a8]) integer channels, each divided by [code]255.0[/code] for their final value.
+				Returns a [Color] constructed from red ([param r8]), green ([param g8]), blue ([param b8]), and optionally alpha ([param a8]) integer channels, each divided by [code]255.0[/code] for their final value. Using [method Color8] instead of the standard [Color] constructor is useful when you need to match exact color values in an [Image].
 				[codeblock]
 				var red = Color8(255, 0, 0)             # Same as Color(1, 0, 0).
 				var dark_blue = Color8(0, 0, 51)        # Same as Color(0, 0, 0.2).
 				var my_color = Color8(306, 255, 0, 102) # Same as Color(1.2, 1, 0, 0.4).
 				[/codeblock]
+				[b]Note:[/b] Due to the lower precision of [method Color8] compared to the standard [Color] constructor, a color created with [method Color8] will generally not be equal to the same color created with the standard [Color] constructor. Use [method Color.is_equal_approx] for comparisons to avoid issues with floating-point precision error.
 			</description>
 		</method>
 		<method name="assert">
@@ -285,7 +286,7 @@
 				@export var string = ""
 				@export var int_number = 5
 				@export var float_number: float = 5
-				@export var image : Image
+				@export var image: Image
 				[/codeblock]
 			</description>
 		</annotation>
@@ -309,7 +310,7 @@
 				Export a [Color] property without allowing its transparency ([member Color.a]) to be edited.
 				See also [constant PROPERTY_HINT_COLOR_NO_ALPHA].
 				[codeblock]
-				@export_color_no_alpha var dye_color : Color
+				@export_color_no_alpha var dye_color: Color
 				[/codeblock]
 			</description>
 		</annotation>

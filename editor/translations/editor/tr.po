@@ -93,13 +93,17 @@
 # Atilla Yiğit Şimşekoğlu <yigitsimsekoglu@gmail.com>, 2023.
 # Muhammed Mustafa Özbay <muhammed.ozby@outlook.com>, 2023.
 # Tolunay Mutlu <tlnymtlu@gmail.com>, 2023.
+# atahanacar <atahanacar@gmx.com>, 2023.
+# efella <furkanefe911@gmail.com>, 2023.
+# Black <ebubekir23atalay@gmail.com>, 2023.
+# Yılmaz Durmaz <yilmaz_durmaz@hotmail.com>, 2023.
 msgid ""
 msgstr ""
 "Project-Id-Version: Godot Engine editor interface\n"
 "Report-Msgid-Bugs-To: https://github.com/godotengine/godot\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2023-02-20 00:45+0000\n"
-"Last-Translator: Tolunay Mutlu <tlnymtlu@gmail.com>\n"
+"PO-Revision-Date: 2023-03-15 01:17+0000\n"
+"Last-Translator: Yılmaz Durmaz <yilmaz_durmaz@hotmail.com>\n"
 "Language-Team: Turkish <https://hosted.weblate.org/projects/godot-engine/"
 "godot/tr/>\n"
 "Language: tr\n"
@@ -107,10 +111,10 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.16-dev\n"
+"X-Generator: Weblate 4.16.2-dev\n"
 
 msgid "Unset"
-msgstr "Belirtilmemiş"
+msgstr "Atamayı Kaldır"
 
 msgid "Physical"
 msgstr "Fiziksel"
@@ -155,13 +159,13 @@ msgid "Left Stick X-Axis, Joystick 0 X-Axis"
 msgstr "Sol Çubuk X-Ekseni, Oyun Çubuğu 0 X-Ekseni"
 
 msgid "Left Stick Y-Axis, Joystick 0 Y-Axis"
-msgstr "Sol Çubuk Y-Ekseni, Oyun Çubuğu 0 Y-Ekseni"
+msgstr "Sol Çubuk Y-Ekseni, Joystick 0 Y-Ekseni"
 
 msgid "Right Stick X-Axis, Joystick 1 X-Axis"
-msgstr "Sağ Çubuk X-Ekseni, Oyun Çubuğu 1 X-Ekseni"
+msgstr "Sağ Çubuk X-Ekseni, Joystick 1 X-Ekseni"
 
 msgid "Right Stick Y-Axis, Joystick 1 Y-Axis"
-msgstr "Sağ Çubuk Y-Ekseni, Oyun Çubuğu 1 Y-Ekseni"
+msgstr "Sağ Çubuk Y-Ekseni, Joystick 1 Y-Ekseni"
 
 msgid "Joystick 2 X-Axis, Left Trigger, Sony L2, Xbox LT"
 msgstr "Oyun Çubuğu 2 X-Ekseni, Sol Tetik, Sony L2, Xbox LT"
@@ -170,10 +174,10 @@ msgid "Joystick 2 Y-Axis, Right Trigger, Sony R2, Xbox RT"
 msgstr "Oyun Çubuğu 2 Y-Ekseni, Sağ Tetik, Sony R2, Xbox RT"
 
 msgid "Joystick 3 X-Axis"
-msgstr "Oyun Çubuğu 3 X-Ekseni"
+msgstr "Joystick 3 X-Ekseni"
 
 msgid "Joystick 3 Y-Axis"
-msgstr "Oyun Çubuğu 3 Y-Ekseni"
+msgstr "Joystick 3 Y-Ekseni"
 
 msgid "Joystick 4 X-Axis"
 msgstr "Oyun Çubuğu 4 X-Ekseni"
@@ -184,17 +188,101 @@ msgstr "Oyun Çubuğu 4 Y-Ekseni"
 msgid "Unknown Joypad Axis"
 msgstr "Bilinmeyen Oyun Kolu Ekseni"
 
+msgid "Joypad Motion on Axis %d (%s) with Value %.2f"
+msgstr "%.2f Değerinde %d (%s) Ekseninde Oyun Kolu Hareketi"
+
+msgid "Bottom Action, Sony Cross, Xbox A, Nintendo B"
+msgstr "Alt Aksiyon, Sony Çarpı, Xbox A, Nintendo B"
+
+msgid "Right Action, Sony Circle, Xbox B, Nintendo A"
+msgstr "Sağ Aksiyon, Sony Daire, Xbox B, Nintendo A"
+
+msgid "Left Action, Sony Square, Xbox X, Nintendo Y"
+msgstr "Sol Aksiyon, Sony Kare, Xbox X, Nintendo Y"
+
+msgid "Top Action, Sony Triangle, Xbox Y, Nintendo X"
+msgstr "Üst Aksiyon, Sony Üçgen, Xbox Y, Nintendo X"
+
+msgid "Back, Sony Select, Xbox Back, Nintendo -"
+msgstr "Geri, Sony Select, Xbox Back, Nintendo -"
+
+msgid "Guide, Sony PS, Xbox Home"
+msgstr "Kılavuz, Sony PS, Xbox Ana Sayfası"
+
+msgid "Start, Nintendo +"
+msgstr "Start, Nintendo +"
+
+msgid "Left Stick, Sony L3, Xbox L/LS"
+msgstr "Sol Çubuk, Sony L3, Xbox L/LS"
+
+msgid "Right Stick, Sony R3, Xbox R/RS"
+msgstr "Sağ Çubuk, Sony R3, Xbox R/RS"
+
+msgid "Left Shoulder, Sony L1, Xbox LB"
+msgstr "Sol Tetik tuşu, Sony L1, Xbox LB"
+
+msgid "Right Shoulder, Sony R1, Xbox RB"
+msgstr "Sağ Tetik tuşu, Sony R1, Xbox RB"
+
+msgid "D-pad Up"
+msgstr "D-pad Yukarı"
+
+msgid "D-pad Down"
+msgstr "D-pad Aşağı"
+
+msgid "D-pad Left"
+msgstr "D-pad Sol"
+
+msgid "D-pad Right"
+msgstr "D-pad Sağ"
+
+msgid "Joypad Button %d"
+msgstr "Oyun Kolu Düğmesi %d"
+
+msgid "Pressure:"
+msgstr "Basınç:"
+
+msgid "touched"
+msgstr "dokunuldu"
+
+msgid "released"
+msgstr "bırakıldı"
+
+msgid "Accept"
+msgstr "Kabul Et"
+
 msgid "Select"
 msgstr "Seç"
 
 msgid "Cancel"
 msgstr "Vazgeç"
 
+msgid "Focus Next"
+msgstr "Sonrakine Odaklan"
+
+msgid "Focus Prev"
+msgstr "Öncekine Odaklan"
+
+msgid "Left"
+msgstr "Sol"
+
+msgid "Right"
+msgstr "Sağ"
+
 msgid "Up"
 msgstr "Yukarı"
 
 msgid "Down"
 msgstr "Aşağı"
+
+msgid "Page Up"
+msgstr "Sayfa Yukarı"
+
+msgid "Page Down"
+msgstr "Sayfa Aşağı"
+
+msgid "Home"
+msgstr "Başlangıç"
 
 msgid "End"
 msgstr "Bitiş"
@@ -212,7 +300,19 @@ msgid "Undo"
 msgstr "Geri al"
 
 msgid "Redo"
-msgstr "Yeniden yap"
+msgstr "Yinele"
+
+msgid "Completion Query"
+msgstr "Tamamlama Sorgusu"
+
+msgid "New Line"
+msgstr "Yeni Satır"
+
+msgid "New Blank Line"
+msgstr "Yeni Boş Satır"
+
+msgid "New Line Above"
+msgstr "Yukarıya Yeni Satır"
 
 msgid "Indent"
 msgstr "Girintile"
@@ -236,7 +336,7 @@ msgid "Invalid input %d (not passed) in expression"
 msgstr "İfadede geçersiz giriş %d"
 
 msgid "self can't be used because instance is null (not passed)"
-msgstr "örnek boş olduğu için self kullanılamaz (geçilmedi)"
+msgstr "*self* kullanılamaz çünkü kopya oluşum *null* (verilmedi)"
 
 msgid "Invalid operands to operator %s, %s and %s."
 msgstr "\"%s\" işlecinde geçersiz terimler, '%s' ve '%s'."
@@ -315,6 +415,9 @@ msgstr "Bezier Noktası Ekle"
 
 msgid "Move Bezier Points"
 msgstr "Bezier Noktalarını Taşı"
+
+msgid "Focus"
+msgstr "Odak"
 
 msgid "Change Animation Length"
 msgstr "Animasyon Uzunluğunu Değiştir"
@@ -414,6 +517,9 @@ msgstr "Animasyon Klibi:"
 
 msgid "Toggle Track Enabled"
 msgstr "İz Dönüştürücü Etkin"
+
+msgid "Don't Use Blend"
+msgstr "Karışımı Kullanmayın"
 
 msgid "Continuous"
 msgstr "Sürekli"
@@ -533,7 +639,7 @@ msgid "Scale"
 msgstr "Ölçekle"
 
 msgid "Methods"
-msgstr "Metodlar"
+msgstr "Yöntemler"
 
 msgid "Bezier"
 msgstr "Bezier Eğrisi"
@@ -617,7 +723,7 @@ msgid "Create RESET Track(s)"
 msgstr "RESET İz(ler)i oluşturun"
 
 msgid "Optimize"
-msgstr "En İyileştir"
+msgstr "İyileştir"
 
 msgid "Remove invalid keys"
 msgstr "Geçersiz anahtarları kaldır"
@@ -632,7 +738,7 @@ msgid "Clean-Up Animation(s) (NO UNDO!)"
 msgstr "Animasyon(ları) Temizle (GERİ ALINAMAZ!)"
 
 msgid "Clean-Up"
-msgstr "Temizle"
+msgstr "Temizlik"
 
 msgid "Scale Ratio:"
 msgstr "Ölçek Oranı:"
@@ -660,6 +766,16 @@ msgstr "Satır Numarası:"
 
 msgid "%d replaced."
 msgstr "%d değiştirildi."
+
+msgid "%d match"
+msgid_plural "%d matches"
+msgstr[0] "% d eşleşme"
+msgstr[1] "% d eşleşmeler"
+
+msgid "%d of %d match"
+msgid_plural "%d of %d matches"
+msgstr[0] "%d içinde %d eşleşme"
+msgstr[1] "%d içinde %d eşleşmeler"
 
 msgid "Match Case"
 msgstr "Büyük/Küçük Harf Eşleştir"
@@ -762,6 +878,9 @@ msgstr "Bağla"
 msgid "Signal:"
 msgstr "Sinyal:"
 
+msgid "No description."
+msgstr "Açıklama yok."
+
 msgid "Connect '%s' to '%s'"
 msgstr "'%s' sinyalini '%s' yöntemine bağla"
 
@@ -785,7 +904,7 @@ msgstr ""
 "\"%s\" sinyalinden tüm bağlantıları kaldırmak istediğinizden emin misiniz?"
 
 msgid "Signals"
-msgstr "sinyaller"
+msgstr "Sinyaller"
 
 msgid "Are you sure you want to remove all connections from this signal?"
 msgstr "Bu sinyalden, tüm bağlantıları kaldırmak istediğinizden emin misiniz?"
@@ -848,7 +967,7 @@ msgid "Monitors"
 msgstr "Monitörler"
 
 msgid "Monitor"
-msgstr "Görüntülük"
+msgstr "Ekran, İzleme"
 
 msgid "Value"
 msgstr "Değer"
@@ -1410,10 +1529,13 @@ msgid "3D Physics"
 msgstr "3B Fizik"
 
 msgid "Navigation"
-msgstr "Gezinim"
+msgstr "Gezinti"
 
 msgid "OpenGL"
 msgstr "OpenGL"
+
+msgid "Vulkan"
+msgstr "Vulkan"
 
 msgid "Nodes and Classes:"
 msgstr "Düğümler ve Sınıflar:"
@@ -1725,7 +1847,7 @@ msgid "Save & Restart"
 msgstr "Kaydet ve Baştan Başlat"
 
 msgid "ScanSources"
-msgstr "KaynaklarıTara"
+msgstr "TaramaKaynakları"
 
 msgid ""
 "There are multiple importers for different types pointing to file %s, import "
@@ -1736,6 +1858,9 @@ msgstr ""
 
 msgid "(Re)Importing Assets"
 msgstr "Varlıklar Yeniden-İçe Aktarılıyor"
+
+msgid "Experimental"
+msgstr "Deneysel"
 
 msgid "Top"
 msgstr "Üst"
@@ -1763,6 +1888,9 @@ msgstr "%s'yi geçersiz kılar:"
 
 msgid "default:"
 msgstr "varsayılan:"
+
+msgid "Constructors"
+msgstr "Yapıcı methodlar"
 
 msgid "Operators"
 msgstr "Operatörler"
@@ -1807,6 +1935,9 @@ msgstr "Yapıcı metot açıklaması"
 msgid "Method Descriptions"
 msgstr "Yöntem Açıklamaları"
 
+msgid "Operator Descriptions"
+msgstr "Operatör Açıklamaları"
+
 msgid "%d match."
 msgstr "% d eşleşme."
 
@@ -1850,7 +1981,7 @@ msgid "Class"
 msgstr "Sınıf"
 
 msgid "Method"
-msgstr "Metot"
+msgstr "Yöntem"
 
 msgid "Signal"
 msgstr "Sinyal"
@@ -2430,6 +2561,9 @@ msgstr "Godot'u Geliştirmeye Destek Olun"
 msgid "Run Project"
 msgstr "Projeyi Çalıştır"
 
+msgid "Forward+"
+msgstr "İleri+"
+
 msgid "Compatibility"
 msgstr "Uyumluluk"
 
@@ -2641,6 +2775,9 @@ msgstr ""
 msgid "Quick Load"
 msgstr "Hızlı yükleme"
 
+msgid "Inspect"
+msgstr "İncele"
+
 msgid "Make Unique"
 msgstr "Benzersiz Yap"
 
@@ -2677,6 +2814,9 @@ msgstr "Mantığınızı _run() metoduna yazın."
 msgid "There is an edited scene already."
 msgstr "Düzenlenmiş bir sahne zaten var."
 
+msgid "Common"
+msgstr "Yaygın"
+
 msgid "Editor Settings"
 msgstr "Düzenleyici Ayarları"
 
@@ -2694,14 +2834,113 @@ msgstr "Kısayollar"
 msgid "Binding"
 msgstr "Bağlayıcı"
 
+msgid ""
+"Hold %s to round to integers.\n"
+"Hold Shift for more precise changes."
+msgstr ""
+"Tam sayıya yuvarlamak için %s tuşuna basılı tutun.\n"
+"Hassas değişiklikler için Shift tuşuna basılı tutun."
+
+msgid "No notifications."
+msgstr "Bildirim yok."
+
+msgid "Show notifications."
+msgstr "Bildirimleri göster."
+
+msgid "Silence the notifications."
+msgstr "Bildirimleri sessize al."
+
+msgid "Left Stick Left, Joystick 0 Left"
+msgstr "Sol Kol Sol, Oyunkolu 0 Sol"
+
+msgid "Left Stick Right, Joystick 0 Right"
+msgstr "Sol Kol Sağ, Oyunkolu 0 Sağ"
+
+msgid "Left Stick Up, Joystick 0 Up"
+msgstr "Sol Kol Yukarı, Oyunkolu 0 Yukarı"
+
+msgid "Left Stick Down, Joystick 0 Down"
+msgstr "Sol Kol Aşağı, Oyunkolu 0 Aşağı"
+
+msgid "Right Stick Left, Joystick 1 Left"
+msgstr "Sağ Kol Sol, Oyunkolu 1 Sol"
+
+msgid "Right Stick Right, Joystick 1 Right"
+msgstr "Sağ Kol Sağ, Oyunkolu 1 Sağ"
+
+msgid "Right Stick Up, Joystick 1 Up"
+msgstr "Sağ Kol Yukarı, Oyunkolu 1 Yukarı"
+
+msgid "Right Stick Down, Joystick 1 Down"
+msgstr "Sağ Kol Aşağı, Oyunkolu 1 Aşağı"
+
+msgid "Joystick 2 Left"
+msgstr "Oyunkolu 2 Sol"
+
+msgid "Left Trigger, Sony L2, Xbox LT, Joystick 2 Right"
+msgstr "Sol Tetik, Sony L2, Xbox LT, Oyunkolu 2 Sağ"
+
+msgid "Joystick 2 Up"
+msgstr "Oyunkolu 2 Yukarı"
+
+msgid "Right Trigger, Sony R2, Xbox RT, Joystick 2 Down"
+msgstr "Sağ Tetik, Sony R2, Xbox RT, Oyunkolu 2 Aşağı"
+
+msgid "Joystick 3 Left"
+msgstr "Oyunkolu 3 Sol"
+
+msgid "Joystick 3 Right"
+msgstr "Oyunkolu 3 Sağ"
+
+msgid "Joystick 3 Up"
+msgstr "Oyunkolu 3 Yukarı"
+
+msgid "Joystick 3 Down"
+msgstr "Oyunkolu 3 Aşağı"
+
+msgid "Joystick 4 Left"
+msgstr "Oyunkolu 4 Sol"
+
+msgid "Joystick 4 Right"
+msgstr "Oyunkolu 4 Sağ"
+
+msgid "Joystick 4 Up"
+msgstr "Oyunkolu 4 Yukarı"
+
+msgid "Joystick 4 Down"
+msgstr "Oyunkolu 4 Aşağı"
+
+msgid "Joypad Axis %d %s (%s)"
+msgstr "Oyunkolu Ekseni %d %s (%s)"
+
 msgid "All Devices"
 msgstr "Tüm Aygıtlar"
 
 msgid "Device"
 msgstr "Aygıt"
 
+msgid "Listening for input..."
+msgstr "Giriş için bekleniyor..."
+
+msgid "Filter by event..."
+msgstr "Olaya göre süz..."
+
+msgid ""
+"Target platform requires 'ETC2/ASTC' texture compression. Enable 'Import "
+"ETC2 ASTC' in Project Settings."
+msgstr ""
+"Hedef platform, 'ETC2/ASTC' doku sıkıştırması gerekiriyor. Proje "
+"Ayarları'nda 'ETC2 ASTC İçe Aktar'ı etkinleştirin."
+
+msgid ""
+"Target platform requires 'S3TC/BPTC' texture compression. Enable 'Import "
+"S3TC BPTC' in Project Settings."
+msgstr ""
+"Hedef platform, 'S3TC/BPTC' doku sıkıştırması gerektiriyor. Proje "
+"Ayarları'nda 'S3TC BPTC İçe Aktar'ı etkinleştirin."
+
 msgid "Project export for platform:"
-msgstr "Platform için proje dışa aktarımı:"
+msgstr "Şu platform için proje dışa aktarımı:"
 
 msgid "Completed with warnings."
 msgstr "Uyarılar ile tamamlandı."
@@ -2712,17 +2951,23 @@ msgstr "Başarıyla tamamlandı."
 msgid "Failed."
 msgstr "Başarısız."
 
+msgid "Storing File: %s"
+msgstr "Dosya Depolanıyor: %s"
+
 msgid "Storing File:"
 msgstr "Dosya Depolama:"
 
 msgid "No export template found at the expected path:"
-msgstr "Beklenen adreste dışa aktarım şablonu bulunamadı:"
+msgstr "Beklenen adreste hiç dışa aktarım şablonu bulunamadı:"
+
+msgid "ZIP Creation"
+msgstr "ZIP Oluşturma"
 
 msgid "Could not open file to read from path \"%s\"."
 msgstr "\"%s\" yolundan okunacak dosya açılamadı."
 
 msgid "Packing"
-msgstr "Paketle"
+msgstr "Paketleme"
 
 msgid "Save PCK"
 msgstr "PCK Dosyasına Kaydet"
@@ -3294,6 +3539,9 @@ msgstr "Grup Düzenleyici"
 msgid "Manage Groups"
 msgstr "Grupları Düzenle"
 
+msgid "Global"
+msgstr "Genel"
+
 msgid "Reimport"
 msgstr "Yeniden İçe Aktar"
 
@@ -3376,7 +3624,7 @@ msgid "Import As:"
 msgstr "Şu Şekilde İçe Aktar:"
 
 msgid "Preset"
-msgstr "Ön ayar"
+msgstr "HazırAyar"
 
 msgid "Save Scenes, Re-Import, and Restart"
 msgstr "Sahneleri kaydet, tekrar içe aktar ve baştan başlat"
@@ -3500,6 +3748,9 @@ msgstr "Yerele Göre Atamalar:"
 
 msgid "Locale"
 msgstr "Yerel"
+
+msgid "Set %s on %d nodes"
+msgstr "%d düğüme %s ayarla"
 
 msgid "Select a single node to edit its signals and groups."
 msgstr "Sinyallerini ve Gruplarını düzenlemek için bir Düğüm seçin."
@@ -3903,6 +4154,9 @@ msgstr "Oynatma Modu:"
 
 msgid "Delete Selected"
 msgstr "Seçilenleri Sil"
+
+msgid "Root"
+msgstr "Kök"
 
 msgid "AnimationTree"
 msgstr "AnimasyonAğacı"
@@ -4435,6 +4689,15 @@ msgstr "Varsayılan tipi değiştir"
 msgid "Set Handle"
 msgstr "Tutamacı Ayarla"
 
+msgid "Fill"
+msgstr "Doldurmak"
+
+msgid "Custom"
+msgstr "Özel"
+
+msgid "Expand"
+msgstr "Genişletmek"
+
 msgid "Top Left"
 msgstr "Sol Üst"
 
@@ -4648,6 +4911,15 @@ msgstr ""
 "çalışan projeye yeniden yüklenecektir.\n"
 "Bir cihazda uzaktan kullanıldığında, bu, ağ dosya sistemi seçeneği "
 "etkinleştirildiğinde daha etkilidir."
+
+msgid "No supported features"
+msgstr "Desteklenen özellik yok"
+
+msgid "Add Feature"
+msgstr "Özellik Ekle"
+
+msgid " - Variation"
+msgstr " Varyasyon"
 
 msgid "Convert to CPUParticles2D"
 msgstr "2BİşlemciPartikül'e dönüştür"
@@ -5057,6 +5329,9 @@ msgstr "Anahtar ekleme devre dışı (eklenmiş anahtar yok)."
 msgid "Animation Key Inserted."
 msgstr "Animasyon Anahtarı Eklendi."
 
+msgid "Objects: %d\n"
+msgstr "Nesneler: %d\n"
+
 msgid "Top View."
 msgstr "Üstten Görünüm."
 
@@ -5113,6 +5388,9 @@ msgstr "Abartı Görüntüle"
 
 msgid "Display Unshaded"
 msgstr "Gölgesiz Görüntüle"
+
+msgid "SSAO"
+msgstr "SSAO"
 
 msgid "View Environment"
 msgstr "Ortamı Göster"
@@ -5257,7 +5535,7 @@ msgid "Reset Field of View to Default"
 msgstr "Varsayılan Görüş Alanına Dön"
 
 msgid "Transform"
-msgstr "Dönüşüm"
+msgstr "Şekillendirme, Şekil"
 
 msgid "Snap Object to Floor"
 msgstr "Nesneyi zemine hizala"
@@ -5342,6 +5620,12 @@ msgstr "Sonrası"
 
 msgid "Sun Color"
 msgstr "Güneş Rengi"
+
+msgid "Glow"
+msgstr "Işıltı"
+
+msgid "Tonemap"
+msgstr "Ton haritası"
 
 msgid "Remove Point from Curve"
 msgstr "Noktayı Eğriden Kaldır"
@@ -6027,6 +6311,9 @@ msgstr "(boş)"
 msgid "Animations:"
 msgstr "Animasyonlar:"
 
+msgid "Delete Animation"
+msgstr "Animasyonu Sil"
+
 msgid "Animation Frames:"
 msgstr "Animasyon Çerçeveleri:"
 
@@ -6078,14 +6365,29 @@ msgstr "Adım:"
 msgid "Styleboxes"
 msgstr "StilKutusu"
 
+msgid "1 color"
+msgid_plural "{num} colors"
+msgstr[0] "1 renk"
+msgstr[1] "{num} renk"
+
 msgid "No colors found."
 msgstr "Renk bulunamadı."
+
+msgid "1 constant"
+msgid_plural "{num} constants"
+msgstr[0] "1 sabit"
+msgstr[1] "{num} sabit"
 
 msgid "No constants found."
 msgstr "Sabitler bulunamadı."
 
 msgid "No fonts found."
 msgstr "Yazı tipi bulunamadı."
+
+msgid "1 font size"
+msgid_plural "{num} font sizes"
+msgstr[0] "1 yazı boyutu"
+msgstr[1] "{num} yazı boyutu"
 
 msgid "No icons found."
 msgstr "Simge bulunamadı."
@@ -6483,6 +6785,12 @@ msgstr "Yatay Yansıt"
 msgid "Flip Vertically"
 msgstr "Dikey Yansıt"
 
+msgid "Tiles"
+msgstr "Döşemeler, Tiles"
+
+msgid "Atlas"
+msgstr "Atlas"
+
 msgid "Yes"
 msgstr "Evet"
 
@@ -6545,7 +6853,7 @@ msgid "Select SSH private key path"
 msgstr "SSH özel anahtar yolu seç"
 
 msgid "SSH Passphrase"
-msgstr "SSH Parolası"
+msgstr "SSH Güvenlik Cümlesi"
 
 msgid "Detect new changes"
 msgstr "Yeni değişiklikleri tespit et"
@@ -6702,6 +7010,12 @@ msgstr "Bölümlenme"
 
 msgid "Light"
 msgstr "Işık"
+
+msgid "Sky"
+msgstr "Gökyüzü"
+
+msgid "Fog"
+msgstr "Sis"
 
 msgid "Add Node"
 msgstr "Düğüm Ekle"
@@ -7173,6 +7487,9 @@ msgstr "Görsel Niteliği Düzenle:"
 
 msgid "Visual Shader Mode Changed"
 msgstr "Görsel Shader Modu Değişti"
+
+msgid "Bake VoxelGI"
+msgstr "VoxelGI pişir"
 
 msgid "The path specified doesn't exist."
 msgstr "Belirtilen yol mevcut değil."
@@ -7814,6 +8131,9 @@ msgstr "Betik Aç / Konum Seç"
 msgid "Open Script"
 msgstr "Betik Aç"
 
+msgid "Inherit"
+msgstr "Miras Alma"
+
 msgid "File exists, it will be reused."
 msgstr "Dosya mevcut, yeniden kullanılacak."
 
@@ -8025,11 +8345,17 @@ msgstr "Giden RPC"
 msgid "Config"
 msgstr "Yapılandırma"
 
+msgid "Count"
+msgstr "Sayma"
+
 msgid "Size"
 msgstr "Boyut"
 
 msgid "Network Profiler"
 msgstr "Ağ Profilcisi"
+
+msgid "Delete Property?"
+msgstr "Özellik Silinsin Mi?"
 
 msgid "A NavigationMesh resource must be set or created for this node to work."
 msgstr ""
@@ -8290,6 +8616,12 @@ msgstr "Tanımlayıcı eksik."
 msgid "The character '%s' is not allowed in Identifier."
 msgstr "Tanımlayıcı'da '%s' karakterine izin verilmiyor."
 
+msgid "Can't get filesystem access."
+msgstr "Dosya sistemi erişimi alınamıyor."
+
+msgid "Failed to get Info.plist hash."
+msgstr "Bilgi alınamadı.plist karması."
+
 msgid "Could not open icon file \"%s\"."
 msgstr "İkon dosyası \"%s\" açılamadı."
 
@@ -8487,6 +8819,13 @@ msgid "The occluder polygon for this occluder is empty. Please draw a polygon."
 msgstr "Bu engelleyici için engelleyici çokgeni boş. Lütfen bir çokgen çizin."
 
 msgid ""
+"The NavigationObstacle2D only serves to provide collision avoidance to a "
+"Node2D object."
+msgstr ""
+"NavigationObstacle2D, yalnızca bir Node2D nesnesine çarpışmadan kaçınma "
+"sağlamaya hizmet eder."
+
+msgid ""
 "ParallaxLayer node only works when set as child of a ParallaxBackground node."
 msgstr ""
 "ParallaxLayer, yalnızca ParallaxBackground düğümünün çocuğu olduğu zaman "
@@ -8673,3 +9012,6 @@ msgstr "uniform için atama."
 
 msgid "Constants cannot be modified."
 msgstr "Sabit değerler değiştirilemez."
+
+msgid "Shader include file does not exist: "
+msgstr "Gölgelendirici içerme dosyası mevcut değil: "

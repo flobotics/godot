@@ -1066,8 +1066,13 @@ void EditorExportPlatformAndroid::_fix_manifest(const Ref<EditorExportPreset> &p
 					if (_uses_vulkan()) {
 						// Require vulkan hardware level 1 support
 						feature_names.push_back("android.hardware.vulkan.level");
-						feature_required_list.push_back(true);
+						feature_required_list.push_back(false);
 						feature_versions.push_back(1);
+
+						// Require vulkan version 1.0
+						feature_names.push_back("android.hardware.vulkan.version");
+						feature_required_list.push_back(true);
+						feature_versions.push_back(0x400003); // Encoded value for api version 1.0
 					}
 
 					if (feature_names.size() > 0) {

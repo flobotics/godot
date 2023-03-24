@@ -1825,7 +1825,6 @@ RID RenderingDeviceVulkan::texture_create(const TextureFormat &p_format, const T
 		}
 
 		if (p_format.usage_bits & TEXTURE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT && !(flags & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)) {
-			printf("vkformat: %x\n", image_create_info.format);
 			ERR_FAIL_V_MSG(RID(), "Format " + format_text + " does not support usage as depth-stencil attachment.");
 		}
 
@@ -2530,7 +2529,7 @@ Error RenderingDeviceVulkan::_texture_update(RID p_texture, uint32_t p_layer, co
 
 		for (uint32_t z = 0; z < depth; z++) { // For 3D textures, depth may be > 0.
 
-			const uint8_t *read_ptr = read_ptr_mipmap + image_size * z / depth;
+			const uint8_t *read_ptr = read_ptr_mipmap + (image_size / depth) * z;
 
 			for (uint32_t y = 0; y < height; y += region_size) {
 				for (uint32_t x = 0; x < width; x += region_size) {
